@@ -4,14 +4,16 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { headers } from 'next/headers'
 
-// Initialize Stripe
-// NOTE: Verify your API version matches your Stripe dashboard logic.
-// Using '2025-01-27.acacia' as requested, or fall back to latest if needed.
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2025-01-27.acacia' as any,
-})
-
 export async function startStripeVerification(formData: FormData) {
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeSecretKey) {
+        throw new Error("Missing Stripe Secret Key");
+    }
+
+    // Initialize Stripe inside the action
+    const stripe = new Stripe(stripeSecretKey, {
+        apiVersion: '2025-01-27.acacia' as any,
+    })
     const profileId = formData.get('profileId') as string
     const returnTo = formData.get('returnTo') as string
     const supabase = await createClient()
