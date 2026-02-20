@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/utils/supabase/client";
 
 import { Suspense } from "react";
 
 function PortalContent() {
+    const supabase = createClient();
     const router = useRouter();
     const searchParams = useSearchParams();
     const planFromUrl = searchParams.get("plan");

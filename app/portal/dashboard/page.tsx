@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { UploadCloud, FileText, Settings, Upload, MapPin, Truck, AlertCircle, Clock, CheckCircle, ArrowRight } from "lucide-react";
 import {
@@ -17,6 +17,7 @@ type ServiceMode = 'online' | 'dropoff' | 'pickup';
 type PaymentStatus = 'unpaid' | 'paid';
 
 export default function DashboardPage() {
+    const supabase = createClient();
     const router = useRouter();
     const [plan, setPlan] = useState<string | null>(null);
     const [userEmail, setUserEmail] = useState<string | null>(null);

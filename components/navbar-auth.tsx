@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/utils/supabase/client";
 
 export function NavbarAuth() {
+    const supabase = createClient();
     const [userPlan, setUserPlan] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 

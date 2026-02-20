@@ -1,0 +1,96 @@
+app/robots.ts:4:    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://vsfholdings.com'
+app/auth/callback/route.ts:16:            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+app/auth/callback/route.ts:17:            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+app/signup/page.tsx:127:    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+app/signup/page.tsx:128:    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+app/admin/layout.tsx:26:        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+app/admin/layout.tsx:27:        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+app/visit/page.tsx:13:        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+app/visit/page.tsx:14:        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+app/dashboard/chat/page.tsx:33:        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+app/dashboard/chat/page.tsx:34:        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+app/components/dashboard-navbar.tsx:21:        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+app/components/dashboard-navbar.tsx:22:        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+app/sitemap.ts:4:    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://vsfholdings.com'
+app/layout.tsx:56:          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&loading=async`}
+app/actions/admin-actions.ts:6:    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+app/actions/admin-actions.ts:7:    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+app/actions/admin-actions.ts:888:        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://platform.vsfcapital.ca'
+app/actions/admin-actions.ts:894:        if (process.env.STRIPE_SECRET_KEY) {
+app/actions/admin-actions.ts:897:            const stripe = new (Stripe as any)(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' })
+app/actions/admin-actions.ts:923:        if (process.env.COINBASE_API_KEY) {
+app/actions/admin-actions.ts:926:            CoinbaseClient.init(process.env.COINBASE_API_KEY)
+app/actions/admin-actions.ts:969:        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://platform.vsfcapital.ca'
+app/actions/admin-actions.ts:974:        if (process.env.STRIPE_SECRET_KEY) {
+app/actions/admin-actions.ts:977:            const stripe = new (Stripe as any)(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' })
+app/actions/admin-actions.ts:1026:            const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2023-10-16' as any })
+app/actions/debug-documents.ts:8:    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+app/actions/debug-documents.ts:9:    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+app/actions/coinbase-actions.ts:8:    const coinbaseApiKey = process.env.COINBASE_API_KEY;
+app/actions/coinbase-actions.ts:45:        // Dynamically get the base url from env or verify headers if needed, but for now process.env.NEXT_PUBLIC_BASE_URL is a safe bet if configured, or origin
+app/actions/coinbase-actions.ts:46:        redirect_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/filing/success`,
+app/actions/coinbase-actions.ts:47:        cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/filing/intake/payment`,
+app/actions/filing-actions.ts:85:        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+app/actions/filing-actions.ts:86:        process.env.SUPABASE_SERVICE_ROLE_KEY!
+app/actions/stripe-actions.ts:8:    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+app/actions/stripe-actions.ts:24:    const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
+app/actions/document-actions.ts:12:        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+app/actions/document-actions.ts:13:        process.env.SUPABASE_SERVICE_ROLE_KEY!
+app/actions/document-actions.ts:142:        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+app/actions/document-actions.ts:143:        process.env.SUPABASE_SERVICE_ROLE_KEY!
+app/actions/document-actions.ts:199:        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+app/actions/document-actions.ts:200:        process.env.SUPABASE_SERVICE_ROLE_KEY!
+app/actions/document-actions.ts:235:        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+app/actions/document-actions.ts:236:        process.env.SUPABASE_SERVICE_ROLE_KEY!
+app/actions/document-actions.ts:285:        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+app/actions/document-actions.ts:286:        process.env.SUPABASE_SERVICE_ROLE_KEY!
+app/actions/document-actions.ts:329:        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+app/actions/document-actions.ts:330:        process.env.SUPABASE_SERVICE_ROLE_KEY!
+app/actions/document-actions.ts:421:        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+app/actions/document-actions.ts:422:        process.env.SUPABASE_SERVICE_ROLE_KEY!
+app/actions/payment-actions.ts:14:    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+app/api/debug-banking/route.ts:9:        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+app/api/debug-banking/route.ts:10:        process.env.SUPABASE_SERVICE_ROLE_KEY!
+app/api/debug-filing-history/route.ts:4:    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+app/api/debug-filing-history/route.ts:5:    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+app/api/debug-schema/check-missing-info/route.ts:7:    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+app/api/debug-schema/check-missing-info/route.ts:8:    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+app/api/debug-schema/route.ts:7:        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+app/api/debug-schema/route.ts:8:        process.env.SUPABASE_SERVICE_ROLE_KEY!
+app/api/checkout_sessions/route.ts:11:        const key = process.env.STRIPE_SECRET_KEY;
+app/api/checkout_sessions/route.ts:37:        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+app/api/checkout_sessions/route.ts:38:        const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!; // Must be set
+app/api/checkout_sessions/route.ts:137:        if (process.env.COINBASE_API_KEY) {
+app/api/checkout_sessions/route.ts:140:                Client.init(process.env.COINBASE_API_KEY);
+app/api/plaid/create-link-token/route.ts:16:        const plaidClientId = process.env.PLAID_CLIENT_ID;
+app/api/plaid/create-link-token/route.ts:17:        const plaidSecret = process.env.PLAID_SECRET;
+app/api/plaid/create-link-token/route.ts:25:            basePath: PlaidEnvironments[process.env.PLAID_ENV || 'sandbox'],
+app/api/plaid/exchange-public-token/route.ts:16:        const plaidClientId = process.env.PLAID_CLIENT_ID;
+app/api/plaid/exchange-public-token/route.ts:17:        const plaidSecret = process.env.PLAID_SECRET;
+app/api/plaid/exchange-public-token/route.ts:25:            basePath: PlaidEnvironments[process.env.PLAID_ENV || 'sandbox'],
+app/api/jobs/confirm/route.ts:8:        const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+app/api/jobs/confirm/route.ts:9:        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+app/api/jobs/confirm/route.ts:10:        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+app/api/debug-courier/route.ts:8:            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+app/api/debug-courier/route.ts:9:            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+app/filing/success/page.tsx:17:    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+app/filing/success/page.tsx:18:    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+app/filing/success/page.tsx:19:    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+app/login/actions.ts:13:    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+app/login/actions.ts:60:                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+app/login/actions.ts:61:                process.env.SUPABASE_SERVICE_ROLE_KEY!,
+app/login/actions.ts:122:            emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+utils/supabase/middleware.ts:14:        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+utils/supabase/middleware.ts:15:        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+utils/supabase/middleware.ts:45:            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+utils/supabase/middleware.ts:46:            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+utils/supabase/client.ts:5:        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+utils/supabase/client.ts:6:        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+utils/supabase/server.ts:8:        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+utils/supabase/server.ts:9:        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+utils/google-ai.ts:64:        const projectId = process.env.VERTEX_PROJECT_ID || 'vsf-tax-ai';
+utils/google-ai.ts:65:        const endpointId = process.env.VERTEX_ENDPOINT_ID || '7274015986133499904';
+lib/supabaseClient.ts:4:const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
+lib/supabaseClient.ts:5:const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder";
+components/auth/LoginForm.tsx:27:        const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+components/auth/LoginForm.tsx:28:        const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

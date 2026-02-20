@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { classifyDocument } from '@/utils/google-ai';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function GET() {
     try {
         // Create a dummy 1x1 pixel PNG

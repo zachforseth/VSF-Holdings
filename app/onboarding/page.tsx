@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -283,6 +283,7 @@ function SimpleCalendar({ onSelect, onClose }: { onSelect: (date: Date) => void,
 // ----------------------------------------------------------------------
 
 function CourierScheduler() {
+    const supabase = createClient();
     const router = useRouter();
     const searchParams = useSearchParams();
     const plan = searchParams.get("plan") || "pro";
