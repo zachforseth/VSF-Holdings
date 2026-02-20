@@ -124,7 +124,7 @@ export default async function SelectProfilePage({ searchParams }: { searchParams
                     </div>
                 </div>
                 <div className='flex flex-col items-center gap-6 pt-6'>
-                    <Link href={`/filing/new-profile?year=${selectedYear}`} className='bg-[#2C2C2C] text-white text-base font-semibold py-4 px-12 rounded-full hover:bg-black transition-all shadow-xl flex items-center gap-2'>
+                    <Link href={`/filing/new-profile?year=${selectedYear}&returnTo=/filing/intake/review-group`} className='bg-[#2C2C2C] text-white text-base font-semibold py-4 px-12 rounded-full hover:bg-black transition-all shadow-xl flex items-center gap-2'>
                         <Plus className='w-5 h-5' /> Create a new profile
                     </Link>
 

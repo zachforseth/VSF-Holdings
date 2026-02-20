@@ -8,7 +8,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const pathname = usePathname();
 
     // SECURE TUNNEL LOGIC: Bypass Dashboard Shell for specific pages
-    if (pathname?.startsWith('/dashboard/new-profile') || pathname?.startsWith('/dashboard/verify-identity')) {
+    if (pathname?.startsWith('/dashboard/new-profile') || pathname?.startsWith('/dashboard/verify-identity') || pathname?.startsWith('/filing/select-profile')) {
         return <div className="font-manrope">{children}</div>;
     }
 

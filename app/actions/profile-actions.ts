@@ -95,9 +95,16 @@ export async function createTaxProfile(formData: FormData) {
 
     // Check if user is in their initial onboarding flow right after signing up
     const isOnboarding = formData.get('onboarding') === 'true';
+    const customReturnTo = formData.get('returnTo') as string;
 
-    // Success! Go to the next step.
-    const returnPath = isOnboarding ? '/dashboard' : `/filing/intake/questionnaire?profileId=${data.id}&verified=true`;
+    // Determine Base Return Path
+    let returnPath = `/filing/intake/questionnaire?profileId=${data.id}&verified=true`;
+
+    if (isOnboarding) {
+        returnPath = '/dashboard';
+    } else if (customReturnTo) {
+        returnPath = customReturnTo;
+    }
 
     redirect(`/dashboard/verify-identity?profileId=${data.id}&returnTo=${encodeURIComponent(returnPath)}`)
 }
@@ -134,8 +141,8 @@ export async function startPriorYearFiling(existingProfileId: string, targetYear
     if (existingYearProfile) {
         // If it already exists, redirect based on verification status
         const nextStep = existingYearProfile.stripe_verification_status === 'verified'
-            ? `/filing/intake/questionnaire?profileId=${existingYearProfile.id}`
-            : `/dashboard/verify-identity?profileId=${existingYearProfile.id}`
+            ? `/filing/intake/review-group`
+            : `/dashboard/verify-identity?profileId=${existingYearProfile.id}&returnTo=/filing/intake/review-group`
         redirect(nextStep)
     }
 
@@ -178,7 +185,7 @@ export async function startPriorYearFiling(existingProfileId: string, targetYear
 
     // 4. Redirect to the flow
     const nextStep = newProfile.stripe_verification_status === 'verified'
-        ? `/filing/intake/questionnaire?profileId=${newProfile.id}`
-        : `/dashboard/verify-identity?profileId=${newProfile.id}`
+        ? `/filing/intake/review-group`
+        : `/dashboard/verify-identity?profileId=${newProfile.id}&returnTo=/filing/intake/review-group`
     redirect(nextStep)
 }

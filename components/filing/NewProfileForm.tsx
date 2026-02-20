@@ -8,10 +8,11 @@ interface Props {
     userEmail: string
     year?: number
     onboarding?: boolean
+    returnTo?: string
     actionOverride?: (formData: FormData) => void
 }
 
-export default function NewProfileForm({ userEmail, year, onboarding, actionOverride }: Props) {
+export default function NewProfileForm({ userEmail, year, onboarding, returnTo, actionOverride }: Props) {
     const [selectedYear, setSelectedYear] = useState(year || new Date().getFullYear())
     const [sin, setSin] = useState('')
     const [sinTouched, setSinTouched] = useState(false)
@@ -341,6 +342,7 @@ export default function NewProfileForm({ userEmail, year, onboarding, actionOver
                 <input type='hidden' name='email' value={userEmail} />
                 {year && <input type='hidden' name='year' value={year} />}
                 {onboarding && <input type='hidden' name='onboarding' value='true' />}
+                {returnTo && <input type='hidden' name='returnTo' value={returnTo} />}
                 <input type='hidden' name='residencyProvince' value='AB' />
 
                 <button
