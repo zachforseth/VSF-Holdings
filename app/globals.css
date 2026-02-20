@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
   --radius: 0.5rem;
@@ -70,6 +68,7 @@
 
 /* Ensure a minimum touch target size for mobile devices */
 @media (max-width: 768px) {
+
   button,
   input,
   select,
@@ -81,19 +80,24 @@
 
 /* Premium Shake Animation */
 @keyframes premium-shake {
+
   0%,
   100% {
     transform: translateX(0);
   }
+
   20% {
     transform: translateX(-4px);
   }
+
   40% {
     transform: translateX(4px);
   }
+
   60% {
     transform: translateX(-2px);
   }
+
   80% {
     transform: translateX(2px);
   }
@@ -106,13 +110,16 @@
 }
 
 @keyframes shake {
+
   0%,
   100% {
     transform: translateX(0);
   }
+
   25% {
     transform: translateX(-5px);
   }
+
   75% {
     transform: translateX(5px);
   }
