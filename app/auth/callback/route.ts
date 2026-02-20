@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
                             full_name: user.user_metadata?.full_name || user.user_metadata?.name || '',
                             avatar_url: user.user_metadata?.avatar_url || '',
                             role: 'client'
-                        }, { onConflict: 'id' });
+                        }, { onConflict: 'id', ignoreDuplicates: true });
 
                     if (syncError) console.error('--- AUTH CALLBACK: SAFETY NET SYNC ERROR ---', syncError);
                     else console.log('--- AUTH CALLBACK: SAFETY NET SYNC SUCCESS ---');
@@ -90,6 +90,29 @@ export async function GET(request: NextRequest) {
                 // If no profiles exist, push them to create one
                 if (!profiles || profiles.length === 0) {
                     redirectUrl = '/filing/new-profile?onboarding=true';
+                }
+
+                // ADMIN CHECK: Override redirect if they are a VSF Admin
+                const userEmailRaw = (user.email || '').toLowerCase();
+                const isAdminEmail = userEmailRaw.endsWith('@vsfholdings.com');
+
+                if (isAdminEmail) {
+                    const roleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+                    if (roleKey) {
+                        const { createClient: createAdminClient } = require('@supabase/supabase-js');
+                        const adminClient = createAdminClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, roleKey, {
+                            auth: { persistSession: false, autoRefreshToken: false }
+                        });
+
+                        const { data: userProfile } = await adminClient.from('users').select('role').eq('id', user.id).single();
+
+                        if (userProfile?.role === 'admin') {
+                            console.log('--- AUTH CALLBACK: ADMIN OVERRIDE TO /admin/dashboard ---');
+                            redirectUrl = '/admin/dashboard';
+                        }
+                    } else {
+                        console.warn('Missing SUPABASE_SERVICE_ROLE_KEY in callback. Skipping admin route.');
+                    }
                 }
             }
 
