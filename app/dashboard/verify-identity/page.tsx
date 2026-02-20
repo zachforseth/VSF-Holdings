@@ -51,7 +51,7 @@ export default async function VerifyIdentityPage({ searchParams }: { searchParam
 
                         <button
                             type='submit'
-                            className='bg-primary text-white text-lg font-medium py-4 px-12 rounded-full hover:opacity-90 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center gap-3'
+                            className='bg-blue-600 text-white text-lg font-medium py-4 px-12 rounded-full hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center gap-3'
                         >
                             Start Verification
                         </button>

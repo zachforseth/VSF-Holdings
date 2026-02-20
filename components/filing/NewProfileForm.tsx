@@ -7,10 +7,11 @@ import usePlacesAutocomplete, { getGeocode } from "use-places-autocomplete"
 interface Props {
     userEmail: string
     year?: number
+    onboarding?: boolean
     actionOverride?: (formData: FormData) => void
 }
 
-export default function NewProfileForm({ userEmail, year, actionOverride }: Props) {
+export default function NewProfileForm({ userEmail, year, onboarding, actionOverride }: Props) {
     const [selectedYear, setSelectedYear] = useState(year || new Date().getFullYear())
     const [sin, setSin] = useState('')
     const [sinTouched, setSinTouched] = useState(false)
@@ -339,6 +340,7 @@ export default function NewProfileForm({ userEmail, year, actionOverride }: Prop
             <div className='flex items-center justify-end pt-6'>
                 <input type='hidden' name='email' value={userEmail} />
                 {year && <input type='hidden' name='year' value={year} />}
+                {onboarding && <input type='hidden' name='onboarding' value='true' />}
                 <input type='hidden' name='residencyProvince' value='AB' />
 
                 <button

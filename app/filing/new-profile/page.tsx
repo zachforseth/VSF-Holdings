@@ -4,13 +4,13 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import NewProfileForm from '@/components/filing/NewProfileForm'
 
-export default async function NewProfilePage({ searchParams }: { searchParams: Promise<{ year?: string }> }) {
+export default async function NewProfilePage({ searchParams }: { searchParams: Promise<{ year?: string, onboarding?: string }> }) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) redirect('/login')
 
-    const { year } = await searchParams
+    const { year, onboarding } = await searchParams
     const selectedYear = year ? parseInt(year) : new Date().getFullYear()
 
     return (
@@ -34,7 +34,7 @@ export default async function NewProfilePage({ searchParams }: { searchParams: P
                     </p>
                 </div>
 
-                <NewProfileForm userEmail={user.email || ''} year={selectedYear} />
+                <NewProfileForm userEmail={user.email || ''} year={selectedYear} onboarding={onboarding === 'true'} />
             </div>
         </div>
     )

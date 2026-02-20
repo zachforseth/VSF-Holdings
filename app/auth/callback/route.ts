@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
 
                 // If no profiles exist, push them to create one
                 if (!profiles || profiles.length === 0) {
-                    redirectUrl = '/filing/new-profile';
+                    redirectUrl = '/filing/new-profile?onboarding=true';
                 }
             }
 

@@ -93,17 +93,11 @@ export async function createTaxProfile(formData: FormData) {
         throw new Error('Failed to create profile')
     }
 
-    // Check if this is their VERY FIRST profile
-    const { count } = await supabase
-        .from('tax_profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
-
-    // Using count === 1 because we JUST inserted a profile above.
-    const isFirstProfile = count === 1;
+    // Check if user is in their initial onboarding flow right after signing up
+    const isOnboarding = formData.get('onboarding') === 'true';
 
     // Success! Go to the next step.
-    const returnPath = isFirstProfile ? '/dashboard' : `/filing/intake/questionnaire?profileId=${data.id}&verified=true`;
+    const returnPath = isOnboarding ? '/dashboard' : `/filing/intake/questionnaire?profileId=${data.id}&verified=true`;
 
     redirect(`/dashboard/verify-identity?profileId=${data.id}&returnTo=${encodeURIComponent(returnPath)}`)
 }
