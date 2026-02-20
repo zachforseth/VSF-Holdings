@@ -30,6 +30,7 @@ export async function login(formData: FormData) {
         return { error: 'Network Error: Cound not connect to authentication server.' }
     }
 
+    let shouldRedirectAdmin = false;
     try {
         const supabase = await createClient()
 
@@ -56,56 +57,64 @@ export async function login(formData: FormData) {
         const { data: { user } } = await supabase.auth.getUser()
 
         if (user) {
-            // Use Service Role to bypass RLS for role check
-            const adminClient = createAdminClient(
-                process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                process.env.SUPABASE_SERVICE_ROLE_KEY!,
-                {
-                    auth: {
-                        persistSession: false,
-                        autoRefreshToken: false,
+            let role = null;
+            const roleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+            if (roleKey) {
+                // Use Service Role to bypass RLS for role check
+                const adminClient = createAdminClient(
+                    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                    roleKey,
+                    {
+                        auth: {
+                            persistSession: false,
+                            autoRefreshToken: false,
+                        }
                     }
+                )
+
+                const { data: userProfile, error: profileErr } = await adminClient
+                    .from('users')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single()
+
+                if (profileErr) {
+                    console.error('Failed to fetch user profile role:', profileErr.message);
+                } else {
+                    role = userProfile?.role;
                 }
-            )
+            } else {
+                console.warn('Missing SUPABASE_SERVICE_ROLE_KEY. Skipping admin role check.');
+            }
 
-            const { data: userProfile } = await adminClient
-                .from('users')
-                .select('role')
-                .eq('id', user.id)
-                .single()
+            const userEmailRaw = (user.email || '').toLowerCase()
 
-            const role = userProfile?.role
-            const email = (user.email || '').toLowerCase()
-
-            console.log(`[LOGIN DEBUG] User: ${email}, Role: ${role}, ID: ${user.id}`)
+            console.log(`[LOGIN DEBUG] User: ${userEmailRaw}, Role: ${role}, ID: ${user.id}`)
 
             // Admin Logic
-            const isAdminEmail = email.endsWith('@vsfholdings.com')
+            const isAdminEmail = userEmailRaw.endsWith('@vsfholdings.com')
             console.log(`[LOGIN DEBUG] Is Admin Email? ${isAdminEmail}`)
 
             if (role === 'admin' && isAdminEmail) {
-                console.log('[LOGIN DEBUG] Redirecting to Admin Dashboard')
-                revalidatePath('/admin', 'layout')
-                redirect('/admin/dashboard')
+                console.log('[LOGIN DEBUG] Marking for Admin Dashboard Redirect')
+                shouldRedirectAdmin = true;
             }
         }
 
     } catch (e) {
-        if (isRedirectError(e)) throw e // Let redirects bubble up
         console.error('Login Action Unexpected Error:', e)
         return { error: 'An unexpected error occurred during login.' }
+    }
+
+    if (shouldRedirectAdmin) {
+        revalidatePath('/admin', 'layout')
+        redirect('/admin/dashboard')
     }
 
     // Default Client Redirect
     revalidatePath('/', 'layout')
     redirect('/dashboard')
-}
-
-function isRedirectError(error: any) {
-    return error && typeof error === 'object' && (
-        error.digest?.startsWith('NEXT_REDIRECT') ||
-        error.message?.includes('NEXT_REDIRECT')
-    )
 }
 
 export async function signup(formData: FormData) {

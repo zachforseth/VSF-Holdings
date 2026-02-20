@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     // Dynamic Host Resolution
     const hostStr = request.headers.get('x-forwarded-host') || request.headers.get('host') || requestUrl.host;
     const isLocal = hostStr.includes('localhost');
-    const baseUrl = isLocal ? `http://${hostStr}` : 'https://vsfcapitalstructuring.com';
+    const baseUrl = isLocal ? `http://${hostStr}` : `https://${hostStr}`;
 
     console.log(`[Auth Callback] Request URL: ${request.url}`);
     console.log(`[Auth Callback] Resolved Base URL: ${baseUrl}`);
