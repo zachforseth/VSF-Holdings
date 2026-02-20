@@ -59,12 +59,7 @@ export default async function ReviewGroupPage() {
                                     {profile.quoted_plan?.replace('Plan', '').trim()} Plan - ${profile.final_fee || profile.quoted_price}
                                 </span>
 
-                                {/* Remove Button */}
-                                <form action={removeProfileFromCart.bind(null, profile.id)}>
-                                    <button type='submit' className='text-gray-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition-all'>
-                                        <X className='w-5 h-5' />
-                                    </button>
-                                </form>
+
                             </div>
                         </div>
                     ))}
