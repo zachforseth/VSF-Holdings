@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-import { createClient as createAdminClient } from '@supabase/supabase-js'
+
 
 export async function updateSession(request: NextRequest) {
     let response = NextResponse.next({
@@ -47,37 +47,10 @@ export async function updateSession(request: NextRequest) {
         if (!user) {
             return NextResponse.redirect(new URL('/login', request.url))
         }
-
-        // Use Service Role to bypass RLS for role check
-        const adminClient = createAdminClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!,
-            {
-                auth: {
-                    persistSession: false,
-                    autoRefreshToken: false,
-                }
-            }
-        )
-
-        const { data: userProfile } = await adminClient
-            .from('users')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-
-        const role = userProfile?.role
-        const email = (user.email || '').toLowerCase()
-
-        console.log(`[MIDDLEWARE DEBUG] Path: ${request.nextUrl.pathname}`)
-        console.log(`[MIDDLEWARE DEBUG] User: ${email}, Role: ${role}`)
-
-        // Create a response object first to handle cookie setting if needed
-        // but since we are redirecting, we just return the redirect response
-        if (role !== 'admin' || !email.endsWith('@vsfholdings.com')) {
-            console.log('[MIDDLEWARE DEBUG] Unauthorized Admin Access -> Redirecting to /dashboard')
-            return NextResponse.redirect(new URL('/dashboard', request.url))
-        }
+        // Note: The specific 'admin' role check against the database is handled 
+        // securely in `app/admin/layout.tsx` via the Node.js runtime. 
+        // We avoid executing database queries in this Edge Middleware to comply 
+        // with AWS Amplify's strict Edge function footprint limits.
     }
 
     return response
