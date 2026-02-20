@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 
 import { createClient as createAdminClient } from '@supabase/supabase-js'
@@ -110,6 +111,12 @@ function isRedirectError(error: any) {
 export async function signup(formData: FormData) {
     const supabase = await createClient()
 
+    // Dynamically get the current host to prevent undefined or bad redirects
+    const headerPayload = await headers();
+    const host = headerPayload.get('x-forwarded-host') || headerPayload.get('host') || process.env.NEXT_PUBLIC_SITE_URL || 'localhost:3000';
+    const protocol = host.includes('localhost') ? 'http' : 'https';
+    const origin = `${protocol}://${host}`;
+
     // 1. Validate Data
     const email = formData.get('email') as string
     const password = formData.get('password') as string
@@ -119,7 +126,7 @@ export async function signup(formData: FormData) {
         email,
         password,
         options: {
-            emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+            emailRedirectTo: `${origin}/auth/callback`,
         },
     })
 

@@ -1,20 +1,40 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 
-export async function GET(request: Request) {
-    const { searchParams, origin } = new URL(request.url);
-    const code = searchParams.get('code');
-    // Default to dashboard if no 'next' param provided
-    const next = searchParams.get('next') ?? '/dashboard';
+export async function GET(request: NextRequest) {
+    const requestUrl = request.nextUrl.clone();
+    const code = requestUrl.searchParams.get('code');
+    const next = requestUrl.searchParams.get('next') ?? '/dashboard';
+
+    // AWS Amplify Forwarded Host Handling
+    const forwardedHost = request.headers.get('x-forwarded-host');
+    let baseUrl = requestUrl.origin;
+    if (forwardedHost) {
+        baseUrl = `https://${forwardedHost}`;
+    } else if (requestUrl.hostname === 'localhost' && process.env.NEXT_PUBLIC_SITE_URL) {
+        baseUrl = process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '');
+    }
+
+    console.log(`[Auth Callback] Request URL: ${request.url}`);
+    console.log(`[Auth Callback] Resolved Base URL: ${baseUrl}`);
 
     if (code) {
         console.log('--- AUTH CALLBACK: CODE RECEIVED ---');
         // 1. Create a temporary holding tank for cookies
         const cookieStore = new Map<string, { value: string; options: CookieOptions }>();
 
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        if (!supabaseUrl || !supabaseAnonKey) {
+            console.error("🚨 [Auth Callback] Environment variables missing!");
+        } else {
+            console.log(`[Auth Callback] Connecting to Supabase Host: ${new URL(supabaseUrl).hostname}`);
+        }
+
         const supabase = createServerClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            supabaseUrl!,
+            supabaseAnonKey!,
             {
                 cookies: {
                     get(name: string) {
@@ -80,8 +100,8 @@ export async function GET(request: Request) {
             }
 
             // 3. Create the Redirect Response
-            console.log('--- AUTH CALLBACK: REDIRECTING TO ---', redirectUrl);
-            const response = NextResponse.redirect(`${origin}${redirectUrl}`);
+            console.log('--- AUTH CALLBACK: REDIRECTING TO ---', `${baseUrl}${redirectUrl}`);
+            const response = NextResponse.redirect(`${baseUrl}${redirectUrl}`);
 
             // 4. MANUALLY attach every cookie from the Map to the Response
             cookieStore.forEach(({ value, options }, name) => {
@@ -95,5 +115,5 @@ export async function GET(request: Request) {
     }
 
     // If we failed, send back to login with an error
-    return NextResponse.redirect(`${origin}/login?error=auth-code-error`);
+    return NextResponse.redirect(`${baseUrl}/login?error=auth-code-error`);
 }

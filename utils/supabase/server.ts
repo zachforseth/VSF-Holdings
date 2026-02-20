@@ -3,10 +3,25 @@ import { cookies } from 'next/headers'
 
 export async function createClient() {
     const cookieStore = await cookies()
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+        console.error("🚨 [Supabase Server] Environment variables missing!");
+        console.error("- NEXT_PUBLIC_SUPABASE_URL exists:", !!supabaseUrl);
+        console.error("- NEXT_PUBLIC_SUPABASE_ANON_KEY exists:", !!supabaseAnonKey);
+    } else {
+        try {
+            const urlObj = new URL(supabaseUrl);
+            console.log(`[Supabase Server] Initializing with host: ${urlObj.hostname}`);
+        } catch {
+            console.error(`[Supabase Server] Invalid URL format provided.`);
+        }
+    }
 
     return createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        supabaseUrl!,
+        supabaseAnonKey!,
         {
             cookies: {
                 getAll() {
