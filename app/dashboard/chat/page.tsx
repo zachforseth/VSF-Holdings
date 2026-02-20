@@ -29,10 +29,10 @@ function ChatContent() {
     const [profiles, setProfiles] = useState<any[]>([]);
     const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
 
-    const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabase = React.useMemo(() => createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+    ), []);
 
     // Auto-fill inquiry if parameter present
     useEffect(() => {
