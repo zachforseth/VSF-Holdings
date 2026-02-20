@@ -5,21 +5,6 @@ import { CheckCircle2, ArrowRight, AlertTriangle } from 'lucide-react'
 import Stripe from 'stripe'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2023-10-16' as any,
-})
-
-const supabaseAdmin = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-        auth: {
-            autoRefreshToken: false,
-            persistSession: false
-        }
-    }
-)
-
 export default async function SuccessPage({ searchParams }: { searchParams: Promise<{ session_id?: string }> }) {
     const supabase = await createClient()
     const { session_id } = await searchParams
@@ -28,11 +13,39 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
     if (!user) redirect('/login')
     if (!session_id) redirect('/dashboard')
 
+    // 1. Validate Environment Variables
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!stripeSecretKey || !supabaseUrl || !supabaseServiceRoleKey) {
+        console.error(
+            "Missing required environment variables. STRIPE_SECRET_KEY, NEXT_PUBLIC_SUPABASE_URL, and SUPABASE_SERVICE_ROLE_KEY must be set."
+        );
+        throw new Error("Internal Server Configuration Error");
+    }
+
+    // 2. Initialize SDKs locally (build-safe)
+    const stripe = new Stripe(stripeSecretKey, {
+        apiVersion: '2023-10-16' as any,
+    })
+
+    const supabaseAdmin = createAdminClient(
+        supabaseUrl,
+        supabaseServiceRoleKey,
+        {
+            auth: {
+                autoRefreshToken: false,
+                persistSession: false
+            }
+        }
+    )
+
     // DEBUGGING VARIABLES
     let debugInfo: any = {
         userId: user.id,
         sessionId: session_id,
-        adminKeyPresent: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+        adminKeyPresent: !!supabaseServiceRoleKey,
     }
 
     // 1. Check if profiles exist BEFORE update
