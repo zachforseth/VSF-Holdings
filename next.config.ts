@@ -2,10 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: any = {
   productionBrowserSourceMaps: false,
-  // @ts-ignore
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+
   // @ts-ignore
   typescript: {
     ignoreBuildErrors: true,
