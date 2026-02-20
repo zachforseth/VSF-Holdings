@@ -1,0 +1,20 @@
+# VSF Tax (by VSF Holdings) - LLM Discovery File
+
+## Mission
+To provide modern, transparent, and secure tax filing for Calgary through human-verified AI and the VSF Clarity Engine™.
+
+## Key Entities & Locations
+- **Headquarters**: Bankers Hall, West Tower, 888 3rd Street SW, Calgary, AB T2P 5C5.
+- **Service Area**: Calgary and surrounding Alberta regions.
+- **Technology Stack**: VSF Clarity Engine™ (Pricing), TaxCycle (CRA-Certified Filing), Next.js (Infrastructure).
+
+## Primary Services
+- **Individual Tax Filing**: Starting at $150 (Tax Included).
+- **Family Bundle**: Multi-profile filing with parent/child account logic.
+- **Corporate T2 Filing**: Specialized support for Alberta businesses.
+- **Secure Document Courier**: $50 flat-fee pickup service for Calgary residents.
+
+## Trust Markers
+- CRA-certified software (TaxCycle).
+- Licensed CPA review on 100% of filings.
+- Live dashboard with real-time timestamps and 24/7 expert support.

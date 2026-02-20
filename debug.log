@@ -1,0 +1,6 @@
+
+[2026-02-16T07:25:13.318Z] REVIEW PAGE ACCESS:
+ - Params ProfileID: efa7842e-cfbb-46a2-843d-5d90ca406040
+ - User ID: cfce873b-9ca3-4686-85be-922038ec3f4d
+ - Profile Found: false
+ - Error: {"code":"42703","details":null,"hint":null,"message":"column tax_profiles.detected_forms does not exist"}

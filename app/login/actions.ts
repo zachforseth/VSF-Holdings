@@ -1,0 +1,138 @@
+'use server'
+
+import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/utils/supabase/server'
+
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+
+export async function login(formData: FormData) {
+    console.log('Login Server Action Started')
+
+    // DEBUG: Check Environment and Connectivity
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    console.log('Target Supabase URL:', supabaseUrl)
+
+    if (!supabaseUrl) {
+        console.error('ERROR: NEXT_PUBLIC_SUPABASE_URL is missing')
+        return { error: 'Configuration Error: Missing Supabase URL' }
+    }
+
+    try {
+        console.log('Testing connectivity to Supabase...')
+        const healthCheck = await fetch(`${supabaseUrl}/auth/v1/health`, { method: 'GET', cache: 'no-store' })
+        const text = await healthCheck.text()
+        console.log('Supabase Health Status:', healthCheck.status)
+        console.log('Supabase Health Response (first 200 chars):', text.substring(0, 200))
+    } catch (netErr) {
+        console.error('NETWORK ERROR: Could not reach Supabase:', netErr)
+        return { error: 'Network Error: Cound not connect to authentication server.' }
+    }
+
+    try {
+        const supabase = await createClient()
+
+        // 1. Validate Data
+        const email = formData.get('email') as string
+        const password = formData.get('password') as string
+
+        console.log('Attempting sign in for:', email)
+
+        // 2. Sign In
+        const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        })
+
+        if (error) {
+            console.error('Supabase Sign In Error:', error.message)
+            return { error: error.message }
+        }
+
+        console.log('Sign in successful. Checking role...')
+
+        // 3. Check Role & Redirect
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (user) {
+            // Use Service Role to bypass RLS for role check
+            const adminClient = createAdminClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.SUPABASE_SERVICE_ROLE_KEY!,
+                {
+                    auth: {
+                        persistSession: false,
+                        autoRefreshToken: false,
+                    }
+                }
+            )
+
+            const { data: userProfile } = await adminClient
+                .from('users')
+                .select('role')
+                .eq('id', user.id)
+                .single()
+
+            const role = userProfile?.role
+            const email = (user.email || '').toLowerCase()
+
+            console.log(`[LOGIN DEBUG] User: ${email}, Role: ${role}, ID: ${user.id}`)
+
+            // Admin Logic
+            const isAdminEmail = email.endsWith('@vsfholdings.com')
+            console.log(`[LOGIN DEBUG] Is Admin Email? ${isAdminEmail}`)
+
+            if (role === 'admin' && isAdminEmail) {
+                console.log('[LOGIN DEBUG] Redirecting to Admin Dashboard')
+                revalidatePath('/admin', 'layout')
+                redirect('/admin/dashboard')
+            }
+        }
+
+    } catch (e) {
+        if (isRedirectError(e)) throw e // Let redirects bubble up
+        console.error('Login Action Unexpected Error:', e)
+        return { error: 'An unexpected error occurred during login.' }
+    }
+
+    // Default Client Redirect
+    revalidatePath('/', 'layout')
+    redirect('/dashboard')
+}
+
+function isRedirectError(error: any) {
+    return error && typeof error === 'object' && (
+        error.digest?.startsWith('NEXT_REDIRECT') ||
+        error.message?.includes('NEXT_REDIRECT')
+    )
+}
+
+export async function signup(formData: FormData) {
+    const supabase = await createClient()
+
+    // 1. Validate Data
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
+
+    // 2. Sign Up
+    const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+            emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+        },
+    })
+
+    if (error) {
+        return redirect('/login?message=Could not authenticate user')
+    }
+
+    return redirect('/login?message=Check email to continue sign in process')
+}
+
+export async function logout() {
+    const supabase = await createClient()
+    await supabase.auth.signOut()
+    revalidatePath('/', 'layout')
+    redirect('/login')
+}
