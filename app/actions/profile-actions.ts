@@ -141,8 +141,8 @@ export async function startPriorYearFiling(existingProfileId: string, targetYear
     if (existingYearProfile) {
         // If it already exists, redirect based on verification status
         const nextStep = existingYearProfile.stripe_verification_status === 'verified'
-            ? `/filing/intake/review-group`
-            : `/dashboard/verify-identity?profileId=${existingYearProfile.id}&returnTo=/filing/intake/review-group`
+            ? `/filing/intake/questionnaire?profileId=${existingYearProfile.id}`
+            : `/dashboard/verify-identity?profileId=${existingYearProfile.id}`
         redirect(nextStep)
     }
 
@@ -185,7 +185,7 @@ export async function startPriorYearFiling(existingProfileId: string, targetYear
 
     // 4. Redirect to the flow
     const nextStep = newProfile.stripe_verification_status === 'verified'
-        ? `/filing/intake/review-group`
-        : `/dashboard/verify-identity?profileId=${newProfile.id}&returnTo=/filing/intake/review-group`
+        ? `/filing/intake/questionnaire?profileId=${newProfile.id}`
+        : `/dashboard/verify-identity?profileId=${newProfile.id}`
     redirect(nextStep)
 }
