@@ -2,24 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-
 :root {
   --radius: 0.5rem;
 
   /* VSF Brand Colors */
-  /* Cream Background */
-  --background: #FAF9F6;
-  /* Dark text for contrast */
+  --background: #faf9f6;
   --foreground: hsl(219, 50%, 8%);
 
-  /* Card uses white or slightly off-white */
   --card: hsl(0, 0%, 100%);
   --card-foreground: hsl(219, 50%, 8%);
 
   --popover: hsl(0, 0%, 100%);
   --popover-foreground: hsl(219, 50%, 8%);
 
-  /* Primary Blue */
   --primary: hsl(221, 72%, 55%);
   --primary-foreground: hsl(0, 0%, 100%);
 
@@ -57,11 +52,14 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    /* Replaces @apply border-border outline-ring/50 (which is breaking your build) */
+    border-color: var(--border);
   }
 
   body {
-    @apply bg-background text-foreground;
+    /* Replaces @apply bg-background text-foreground */
+    background: var(--background);
+    color: var(--foreground);
   }
 
   html,
@@ -71,10 +69,8 @@
   }
 }
 
-
 /* Ensure a minimum touch target size for mobile devices */
 @media (max-width: 768px) {
-
   button,
   input,
   select,
@@ -86,7 +82,6 @@
 
 /* Premium Shake Animation */
 @keyframes premium-shake {
-
   0%,
   100% {
     transform: translateX(0);
@@ -111,13 +106,11 @@
 
 .shake-trigger {
   animation: premium-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-  border-color: #EF4444 !important;
-  /* VSF Red */
-  color: #EF4444 !important;
+  border-color: #ef4444 !important;
+  color: #ef4444 !important;
 }
 
 @keyframes shake {
-
   0%,
   100% {
     transform: translateX(0);
@@ -132,30 +125,23 @@
   }
 }
 
-/* --- Google Places Autocomplete Styling --- */
+/* Google Places Autocomplete Styling */
 .pac-container {
   @apply !rounded-lg !border !border-gray-200 !shadow-xl !font-sans;
   margin-top: 8px;
-  /* Gap between input and dropdown */
   z-index: 9999 !important;
-  /* Ensure it sits on top of everything */
-  /* Fix Width Issues: */
   box-sizing: border-box !important;
   max-width: 100% !important;
-  /* Prevents it from going off-screen */
 }
 
-/* The List Items */
 .pac-item {
   @apply !px-4 !py-3 !cursor-pointer !border-t !border-gray-100 !flex !items-center !gap-2;
   color: #6b7280;
-  /* Text Gray */
   font-size: 0.875rem;
-  /* text-sm */
 }
 
-/* Limit to 3 items as requested by user */
-.pac-item:nth-child(n+4) {
+/* Limit to 3 items */
+.pac-item:nth-child(n + 4) {
   display: none !important;
 }
 
@@ -167,13 +153,11 @@
   @apply !bg-gray-50;
 }
 
-/* The Text Highlight (Matched Query) */
 .pac-item-query {
   @apply !text-gray-900 !font-medium;
   font-size: 0.875rem;
 }
 
-/* Hide the default Google Marker icon if you want a cleaner look (Optional) */
 .pac-icon {
   display: none !important;
 }
@@ -185,7 +169,7 @@ input::-webkit-inner-spin-button {
   margin: 0 !important;
 }
 
-input[type=number] {
+input[type="number"] {
   -moz-appearance: textfield !important;
   appearance: textfield !important;
 }
