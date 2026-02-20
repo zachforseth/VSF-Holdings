@@ -2,17 +2,30 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2023-10-16' as any,
-});
-
-// Init Supabase (Admin context ideally, but Anon works if configured)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
-
 export async function GET(req: Request) {
     try {
+        // 1. Validate Environment Variables
+        const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        if (!stripeSecretKey || !supabaseUrl || !supabaseAnonKey) {
+            console.error(
+                "Missing required environment variables. STRIPE_SECRET_KEY, NEXT_PUBLIC_SUPABASE_URL, and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set."
+            );
+            return NextResponse.json(
+                { error: "Internal Server Configuration Error" },
+                { status: 500 }
+            );
+        }
+
+        // 2. Initialize SDKs locally (build-safe)
+        const stripe = new Stripe(stripeSecretKey, {
+            apiVersion: '2023-10-16' as any,
+        });
+
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
         const { searchParams } = new URL(req.url);
         const sessionId = searchParams.get('session_id');
 
@@ -22,7 +35,7 @@ export async function GET(req: Request) {
 
         console.log("Verifying Session:", sessionId);
 
-        // 1. Retrieve Session from Stripe to get Job ID & Payment Details
+        // 3. Retrieve Session from Stripe to get Job ID & Payment Details
         const session = await stripe.checkout.sessions.retrieve(sessionId, {
             expand: ['payment_intent.payment_method'] // Need this for card details
         });
@@ -30,22 +43,22 @@ export async function GET(req: Request) {
         const jobId = session.metadata?.jobId;
         if (!jobId) throw new Error("No Job ID found in session metadata");
 
-        // 2. Mock Email Sending (Log it)
+        // 4. Mock Email Sending (Log it)
         console.log(`[EMAIL TRIGGER] Sending confirmation email to guest...`);
 
-        // 3. Update Job in Supabase (Mark as Paid)
+        // 5. Update Job in Supabase (Mark as Paid)
         const { error: updateError } = await supabase
             .from('courier_jobs')
             .update({
                 payment_status: 'paid',
-                status: 'confirmed', // Fix 3: Explicitly set job status to confirmed
+                status: 'confirmed', // Explicitly set job status to confirmed
                 stripe_payment_id: session.payment_intent as string || sessionId,
             })
             .eq('id', jobId);
 
         if (updateError) console.error("DB Update Error:", updateError);
 
-        // 4. Fetch Latest Job Data to return to Frontend
+        // 6. Fetch Latest Job Data to return to Frontend
         const { data: job, error: fetchError } = await supabase
             .from('courier_jobs')
             .select('*')
@@ -54,7 +67,7 @@ export async function GET(req: Request) {
 
         if (fetchError || !job) throw new Error("Failed to fetch job details");
 
-        // 5. Extract Payment Method Info
+        // 7. Extract Payment Method Info
         let paymentInfo = "Credit Card";
         const paymentIntent = session.payment_intent as Stripe.PaymentIntent;
         if (paymentIntent && typeof paymentIntent !== 'string') {
@@ -74,6 +87,6 @@ export async function GET(req: Request) {
 
     } catch (err: any) {
         console.error("Confirmation Error:", err);
-        return NextResponse.json({ error: err.message }, { status: 500 });
+        return NextResponse.json({ error: err.message || "Internal Server Error" }, { status: 500 });
     }
 }
