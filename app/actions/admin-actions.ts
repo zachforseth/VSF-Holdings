@@ -2,21 +2,29 @@
 
 import { createClient } from '@supabase/supabase-js'
 
-// We need the SERVICE_ROLE key to list all users from auth.users
-// This client MUST ONLY be used in secure server actions checked for admin privileges
-const adminClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-        auth: {
-            autoRefreshToken: false,
-            persistSession: false
-        }
+function getAdminClient() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseServiceRoleKey) {
+        throw new Error("Missing Supabase Admin Environment Variables");
     }
-)
+
+    return createClient(
+        supabaseUrl,
+        supabaseServiceRoleKey,
+        {
+            auth: {
+                autoRefreshToken: false,
+                persistSession: false
+            }
+        }
+    );
+}
 
 export async function getAdminDashboardData(statusFilter?: string) {
     try {
+        const adminClient = getAdminClient();
         // 1. Fetch all users from public.users table (excluding admins)
         const { data: users, error: usersError } = await adminClient
             .from('users')
@@ -151,6 +159,7 @@ export async function getAdminDashboardData(statusFilter?: string) {
 
 export async function getAdminUserDetails(userId: string) {
     try {
+        const adminClient = getAdminClient();
         // 1. Fetch user by ID
         const { data: { user }, error: userError } = await adminClient.auth.admin.getUserById(userId)
 
@@ -174,6 +183,7 @@ export async function getAdminUserDetails(userId: string) {
 
 export async function getAdminProfileDetails(profileId: string) {
     try {
+        const adminClient = getAdminClient();
         // 1. Fetch profile with intake responses and detected forms
         const { data: profile, error: profileError } = await adminClient
             .from('tax_profiles')
@@ -212,6 +222,7 @@ import { revalidatePath } from 'next/cache'
 
 export async function toggleProfileStatus(profileId: string, currentStatus: string) {
     try {
+        const adminClient = getAdminClient();
         const newStatus = currentStatus === 'ACTION_REQUIRED' ? 'in_progress' : 'ACTION_REQUIRED'
 
         const { error } = await adminClient
@@ -234,6 +245,7 @@ export async function toggleProfileStatus(profileId: string, currentStatus: stri
 
 export async function updateReturnAmounts(profileId: string, refundAmount: number | null, balanceOwing: number | null) {
     try {
+        const adminClient = getAdminClient();
         const { error } = await adminClient
             .from('tax_profiles')
             .update({
@@ -255,6 +267,7 @@ export async function updateReturnAmounts(profileId: string, refundAmount: numbe
 
 export async function updateAdminNotes(profileId: string, notes: string) {
     try {
+        const adminClient = getAdminClient();
         const { error } = await adminClient
             .from('tax_profiles')
             .update({ admin_notes: notes })
@@ -273,6 +286,7 @@ export async function updateAdminNotes(profileId: string, notes: string) {
 export async function updateFilingStatus(profileId: string, action: 'START_WORK' | 'REQUEST_INFO' | 'SEND_REVIEW' | 'FILE_RETURN' | 'RESOLVE_FLAG', missingInfo?: any, reviewLink?: string) {
     console.log('updateFilingStatus called with:', { profileId, action, missingInfo, reviewLink })
     try {
+        const adminClient = getAdminClient();
         let status = ''
         const updates: any = {}
         const now = new Date().toISOString()
@@ -374,6 +388,7 @@ export async function updateFilingStatus(profileId: string, action: 'START_WORK'
 
 export async function getProfileMessages(profileId: string) {
     try {
+        const adminClient = getAdminClient();
         const { data: messages, error } = await adminClient
             .from('messages')
             .select('*')
@@ -391,6 +406,7 @@ export async function getProfileMessages(profileId: string) {
 
 export async function sendAdminMessage(profileId: string, content: string) {
     try {
+        const adminClient = getAdminClient();
         // 1. Insert Message
         const { error } = await adminClient
             .from('messages')
@@ -425,6 +441,7 @@ export async function sendAdminMessage(profileId: string, content: string) {
 
 export async function getDocumentUrl(userId: string, filePath: string) {
     try {
+        const adminClient = getAdminClient();
         // In Admin actions, we can use the adminClient to get a signed URL for any file
         // The filePath is stored in 'tax-documents' bucket
         // Note: The bucket name might be different, let's assume 'tax-documents' based on previous context 
@@ -450,6 +467,7 @@ export async function uploadFinalReturn(profileId: string, formData: FormData) {
     if (!file || !profileId) return { success: false, error: 'Missing file or profile ID' };
 
     try {
+        const adminClient = getAdminClient();
         const filePath = `${profileId}/FINAL-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
 
         // Upload to 'final-returns' bucket using Admin Client to bypass RLS
@@ -489,6 +507,7 @@ export async function adminUploadClientDocument(formData: FormData) {
     if (!profileId || files.length === 0) return { success: false, error: 'No files provided' }
 
     try {
+        const adminClient = getAdminClient();
         const cleanProfileId = profileId.substring(0, 36)
 
         // 1. Fetch Filing Year and Current Status
@@ -644,6 +663,7 @@ export async function adminSubmitQuestionnaire(formData: FormData) {
     }
 
     try {
+        const adminClient = getAdminClient();
         const { error } = await adminClient
             .from('tax_profiles')
             .update({ intake_responses: intakeAnswers })
@@ -673,6 +693,7 @@ export async function adminCreateClientAccount(formData: FormData) {
     }
 
     try {
+        const adminClient = getAdminClient();
         // 1. Create Auth User
         const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
             email,
@@ -707,6 +728,7 @@ export async function adminCreateClientAccount(formData: FormData) {
 
 export async function adminCreateProfile(userId: string, formData: FormData) {
     try {
+        const adminClient = getAdminClient();
         // Use a temporary default year until the admin selects one on the next page
         const taxYear = new Date().getFullYear().toString()
 
@@ -746,6 +768,7 @@ export async function adminCreateProfile(userId: string, formData: FormData) {
 
 export async function adminUpdateProfileCredentials(profileId: string, formData: FormData) {
     try {
+        const adminClient = getAdminClient();
         const payload = {
             first_name: formData.get('first_name') as string,
             last_name: formData.get('last_name') as string,
@@ -776,6 +799,7 @@ export async function adminUpdateProfileCredentials(profileId: string, formData:
 
 export async function adminSetFilingYear(profileId: string, year: string) {
     try {
+        const adminClient = getAdminClient();
         const { error } = await adminClient
             .from('tax_profiles')
             .update({ filing_year: year })
@@ -793,6 +817,7 @@ export async function adminSetFilingYear(profileId: string, year: string) {
 
 export async function adminCreateChildFiling(existingProfileId: string, targetYear: string) {
     try {
+        const adminClient = getAdminClient();
         // 1. Fetch the existing profile to clone
         const { data: sourceProfile, error: fetchError } = await adminClient
             .from('tax_profiles')
@@ -846,6 +871,7 @@ export async function adminCreateChildFiling(existingProfileId: string, targetYe
 
 export async function adminGeneratePaymentLinks(profileId: string) {
     try {
+        const adminClient = getAdminClient();
         const { data: profile, error } = await adminClient
             .from('tax_profiles')
             .select('user_id, first_name, last_name, filing_year, quoted_plan, quoted_price')
@@ -926,6 +952,7 @@ export async function adminGeneratePaymentLinks(profileId: string) {
 
 export async function adminGenerateDifferencePaymentLink(profileId: string) {
     try {
+        const adminClient = getAdminClient();
         const { data: profile, error } = await adminClient
             .from('tax_profiles')
             .select('user_id, first_name, last_name, filing_year, balance_owing')
@@ -984,6 +1011,7 @@ export async function adminGenerateDifferencePaymentLink(profileId: string) {
 
 export async function adminGetReceiptUrl(profileId: string) {
     try {
+        const adminClient = getAdminClient();
         const { data } = await adminClient
             .from('tax_profiles')
             .select('payment_id')
@@ -1017,6 +1045,7 @@ export async function adminGetReceiptUrl(profileId: string) {
 
 export async function getCourierJobs(deliveryStatus?: string) {
     try {
+        const adminClient = getAdminClient();
         let query = adminClient
             .from('courier_jobs')
             .select('*')
@@ -1040,6 +1069,7 @@ export async function getCourierJobs(deliveryStatus?: string) {
 
 export async function updateCourierJobStatus(jobId: string, status: string) {
     try {
+        const adminClient = getAdminClient();
         const { error } = await adminClient
             .from('courier_jobs')
             .update({ delivery_status: status, updated_at: new Date().toISOString() })

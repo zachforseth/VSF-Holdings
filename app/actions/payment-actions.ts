@@ -5,15 +5,20 @@ import { redirect } from 'next/navigation'
 import Stripe from 'stripe'
 import { headers } from 'next/headers'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2023-10-16' as any, // Use your preferred version
-})
-
 export async function createStripeCheckout() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) throw new Error('Unauthorized')
+
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeSecretKey) {
+        throw new Error("Missing Stripe Secret Key");
+    }
+
+    const stripe = new Stripe(stripeSecretKey, {
+        apiVersion: '2023-10-16' as any, // Use your preferred version
+    })
 
     // 1. Get the Items from the Cart
     const { data: profiles } = await supabase
