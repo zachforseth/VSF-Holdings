@@ -2,17 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
 import { Configuration, PlaidApi, PlaidEnvironments } from 'plaid'
 
-const configuration = new Configuration({
-    basePath: PlaidEnvironments[process.env.PLAID_ENV || 'sandbox'],
-    baseOptions: {
-        headers: {
-            'PLAID-CLIENT-ID': process.env.PLAID_CLIENT_ID,
-            'PLAID-SECRET': process.env.PLAID_SECRET,
-        },
-    },
-})
-
-const plaidClient = new PlaidApi(configuration)
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
     try {
@@ -22,6 +12,26 @@ export async function POST(request: Request) {
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
+
+        const plaidClientId = process.env.PLAID_CLIENT_ID;
+        const plaidSecret = process.env.PLAID_SECRET;
+
+        if (!plaidClientId || !plaidSecret) {
+            console.error("Missing Plaid Environment Variables");
+            return NextResponse.json({ error: "Server Configuration Error" }, { status: 500 });
+        }
+
+        const configuration = new Configuration({
+            basePath: PlaidEnvironments[process.env.PLAID_ENV || 'sandbox'],
+            baseOptions: {
+                headers: {
+                    'PLAID-CLIENT-ID': plaidClientId,
+                    'PLAID-SECRET': plaidSecret,
+                },
+            },
+        });
+
+        const plaidClient = new PlaidApi(configuration);
 
         const { public_token, profile_id } = await request.json()
 

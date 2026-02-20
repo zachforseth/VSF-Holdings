@@ -1,20 +1,6 @@
 import { PredictionServiceClient, helpers } from '@google-cloud/aiplatform';
 
-// Initialize Vertex AI Prediction Client
-// Use the local JSON key file for authentication
-const client = new PredictionServiceClient({
-    apiEndpoint: 'us-central1-aiplatform.googleapis.com',
-    keyFilename: 'google-credentials.json'
-});
-
-// Vertex AI Configuration
-const PROJECT_ID = process.env.VERTEX_PROJECT_ID || 'vsf-tax-ai'; // Fallback for safety, but env var is preferred
-const LOCATION = 'us-central1';
-const ENDPOINT_ID = process.env.VERTEX_ENDPOINT_ID || '7274015986133499904';
-const ENDPOINT_NAME = `projects/${PROJECT_ID}/locations/${LOCATION}/endpoints/${ENDPOINT_ID}`;
-
-// LOGGING FOR DEBUGGING
-console.log(`[VertexAI] Initialized. Endpoint: ${ENDPOINT_NAME}`);
+// The AI client will be dynamically initialized at runtime inside the classifyDocument function
 
 // Heuristic Helper
 function inferTypeFromFilename(filename: string): string | null {
@@ -75,6 +61,16 @@ export async function classifyDocument(fileBuffer: Buffer, mimeType: string, fil
     console.log(`[VertexAI] Classifying ${fileName} (${mimeType})...`);
 
     try {
+        const projectId = process.env.VERTEX_PROJECT_ID || 'vsf-tax-ai';
+        const endpointId = process.env.VERTEX_ENDPOINT_ID || '7274015986133499904';
+        const location = 'us-central1';
+
+        const client = new PredictionServiceClient({
+            apiEndpoint: `${location}-aiplatform.googleapis.com`,
+            keyFilename: 'google-credentials.json'
+        });
+
+        const endpointName = `projects/${projectId}/locations/${location}/endpoints/${endpointId}`;
         // 1. Prepare Input for Vertex AI
         // Vertex AI Custom/AutoML models typically expect:
         // { content: "base64_string" } or { image_bytes: { b64: "..." } } depending on the model.
@@ -151,7 +147,7 @@ export async function classifyDocument(fileBuffer: Buffer, mimeType: string, fil
 
         // 2. Predict
         const [response] = await (client.predict({
-            endpoint: ENDPOINT_NAME,
+            endpoint: endpointName,
             instances: instances as any[],
         }) as any);
 
