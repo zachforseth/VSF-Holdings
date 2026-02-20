@@ -4,10 +4,15 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { Client, resources } from 'coinbase-commerce-node' // You likely installed this for the pickup flow
 
-// Initialize Coinbase
-Client.init(process.env.COINBASE_API_KEY!)
-
 export async function createCoinbaseCheckout() {
+    const coinbaseApiKey = process.env.COINBASE_API_KEY;
+    if (!coinbaseApiKey) {
+        throw new Error('Server Configuration Error: Missing Coinbase API Key');
+    }
+
+    // Initialize Coinbase
+    Client.init(coinbaseApiKey);
+
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
