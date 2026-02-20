@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@theme inline {
-}
 
 :root {
   --radius: 0.5rem;
