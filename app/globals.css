@@ -52,20 +52,19 @@
 
 @layer base {
   * {
-    /* Replaces @apply border-border outline-ring/50 (which is breaking your build) */
     border-color: var(--border);
-  }
-
-  body {
-    /* Replaces @apply bg-background text-foreground */
-    background: var(--background);
-    color: var(--foreground);
+    outline-color: color-mix(in srgb, var(--ring) 50%, transparent);
   }
 
   html,
   body {
     overflow-x: clip;
     max-width: 100vw;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
   }
 }
 
@@ -86,19 +85,15 @@
   100% {
     transform: translateX(0);
   }
-
   20% {
     transform: translateX(-4px);
   }
-
   40% {
     transform: translateX(4px);
   }
-
   60% {
     transform: translateX(-2px);
   }
-
   80% {
     transform: translateX(2px);
   }
@@ -115,29 +110,39 @@
   100% {
     transform: translateX(0);
   }
-
   25% {
     transform: translateX(-5px);
   }
-
   75% {
     transform: translateX(5px);
   }
 }
 
-/* Google Places Autocomplete Styling */
+/* --- Google Places Autocomplete Styling --- */
 .pac-container {
-  @apply !rounded-lg !border !border-gray-200 !shadow-xl !font-sans;
+  border-radius: 0.5rem !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow:
+    0 20px 25px -5px rgb(0 0 0 / 0.1),
+    0 8px 10px -6px rgb(0 0 0 / 0.1) !important;
+  font-family: inherit !important;
+
   margin-top: 8px;
   z-index: 9999 !important;
   box-sizing: border-box !important;
   max-width: 100% !important;
 }
 
+/* The List Items */
 .pac-item {
-  @apply !px-4 !py-3 !cursor-pointer !border-t !border-gray-100 !flex !items-center !gap-2;
+  padding: 0.75rem 1rem !important;
+  cursor: pointer !important;
+  border-top: 1px solid #f3f4f6 !important;
+
+  /* Avoid flex here; Google injects its own structure */
   color: #6b7280;
   font-size: 0.875rem;
+  line-height: 1.25rem;
 }
 
 /* Limit to 3 items */
@@ -150,14 +155,17 @@
 }
 
 .pac-item:hover {
-  @apply !bg-gray-50;
+  background-color: #f9fafb !important;
 }
 
+/* The Text Highlight (Matched Query) */
 .pac-item-query {
-  @apply !text-gray-900 !font-medium;
+  color: #111827 !important;
+  font-weight: 500 !important;
   font-size: 0.875rem;
 }
 
+/* Hide the default Google Marker icon */
 .pac-icon {
   display: none !important;
 }
