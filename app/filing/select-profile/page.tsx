@@ -63,12 +63,15 @@ export default async function SelectProfilePage({ searchParams }: { searchParams
                                 const isPaidOrFiled = ['PAID', 'FILED', 'SUBMITTED', 'IN_PROGRESS', 'IN_REVIEW', 'READY_TO_PAY'].includes((profileForYear.filing_status || '').toUpperCase())
 
                                 if (isPaidOrFiled && profileForYear.filing_status !== 'IN_PROGRESS') {
+                                    const isActuallyPaid = ['PAID', 'FILED', 'SUBMITTED', 'IN_REVIEW'].includes((profileForYear.filing_status || '').toUpperCase())
+                                    const statusText = isActuallyPaid ? `Already filed for ${selectedYear}` : `Already added for ${selectedYear}`
+
                                     return (
                                         <div key={baseProfile.id} className='w-full bg-gray-50 border border-gray-200 rounded-2xl p-6 flex items-center justify-between opacity-75 cursor-not-allowed'>
                                             <div className='flex flex-col'>
                                                 <span className='text-lg font-bold text-gray-500'>{baseProfile.first_name}&rsquo;s Tax Return</span>
                                             </div>
-                                            <span className='text-sm text-gray-400 font-medium'>Already filed for {selectedYear}</span>
+                                            <span className='text-sm text-gray-400 font-medium'>{statusText}</span>
                                         </div>
                                     )
                                 }
