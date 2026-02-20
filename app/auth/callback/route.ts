@@ -6,14 +6,10 @@ export async function GET(request: NextRequest) {
     const code = requestUrl.searchParams.get('code');
     const next = requestUrl.searchParams.get('next') ?? '/dashboard';
 
-    // AWS Amplify Forwarded Host Handling
-    const forwardedHost = request.headers.get('x-forwarded-host');
-    let baseUrl = requestUrl.origin;
-    if (forwardedHost) {
-        baseUrl = `https://${forwardedHost}`;
-    } else if (requestUrl.hostname === 'localhost' && process.env.NEXT_PUBLIC_SITE_URL) {
-        baseUrl = process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '');
-    }
+    // Dynamic Host Resolution
+    const hostStr = request.headers.get('x-forwarded-host') || request.headers.get('host') || requestUrl.host;
+    const isLocal = hostStr.includes('localhost');
+    const baseUrl = isLocal ? `http://${hostStr}` : 'https://vsfcapitalstructuring.com';
 
     console.log(`[Auth Callback] Request URL: ${request.url}`);
     console.log(`[Auth Callback] Resolved Base URL: ${baseUrl}`);

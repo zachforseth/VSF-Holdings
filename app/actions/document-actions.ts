@@ -192,19 +192,24 @@ export async function getDocuments(profileId: string) {
     const { unstable_noStore: noStore } = await import('next/cache');
     noStore();
 
-
-    // Use Admin Client for reading to ensure we see all docs regardless of RLS
-    // (User should see their own docs, but if RLS read policy is flawed, this fixes it)
-    const adminClient = createAdminClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
-
     // Clean ID
     const cleanProfileId = profileId.substring(0, 36)
 
     try {
-        const { data: documents, error } = await adminClient
+        let supabaseClient: any;
+
+        // Defensive check: AWS Amplify might be missing the Service Role Key
+        if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+            supabaseClient = createAdminClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.SUPABASE_SERVICE_ROLE_KEY
+            );
+        } else {
+            console.warn("SUPABASE_SERVICE_ROLE_KEY is missing. Falling back to authenticated user client.");
+            supabaseClient = await createClient();
+        }
+
+        const { data: documents, error } = await supabaseClient
             .from('tax_documents')
             .select('*')
             .eq('profile_id', cleanProfileId)
