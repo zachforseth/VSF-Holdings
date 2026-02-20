@@ -5,9 +5,8 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '10mb',
     },
-    // Optimize memory during build for small cloud instances (Amplify)
-    memoryBasedWorkersCount: true,
-    cpus: 2,
+    // Strictly limit to 1 CPU to prevent SWC Minifier from parallelizing and spiking RAM
+    cpus: 1,
   },
 };
 
