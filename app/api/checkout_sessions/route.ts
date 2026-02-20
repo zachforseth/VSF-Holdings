@@ -8,7 +8,9 @@ export async function POST(req: Request) {
         console.log("1. API Route Hit");
 
         // Secure Origin for Redirects
-        const origin = req.headers.get("origin") || "https://vsfcapitalstructuring.com";
+        const hostStr = req.headers.get('x-forwarded-host') || req.headers.get('host') || 'localhost:3000';
+        const isLocal = hostStr.includes('localhost');
+        const origin = isLocal ? `http://${hostStr}` : 'https://vsfcapitalstructuring.com';
 
         const key = process.env.STRIPE_SECRET_KEY;
         if (!key) {

@@ -43,8 +43,10 @@ export async function createStripeCheckout() {
     }))
 
     // 3. Create Session
-    const headersList = await headers()
-    const origin = headersList.get('origin') || 'http://localhost:3000'
+    const headersList = await headers();
+    const hostStr = headersList.get('x-forwarded-host') || headersList.get('host') || 'localhost:3000';
+    const isLocal = hostStr.includes('localhost');
+    const origin = isLocal ? `http://${hostStr}` : 'https://vsfcapitalstructuring.com';
 
     const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],

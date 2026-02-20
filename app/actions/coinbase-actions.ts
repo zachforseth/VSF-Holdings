@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { Client, resources } from 'coinbase-commerce-node' // You likely installed this for the pickup flow
 
 export async function createCoinbaseCheckout() {
@@ -29,6 +30,12 @@ export async function createCoinbaseCheckout() {
 
     const totalAmount = profiles.reduce((sum, p) => sum + (p.quoted_price || 0), 0)
 
+    // Dynamic Host Resolution
+    const headersList = await headers();
+    const hostStr = headersList.get('x-forwarded-host') || headersList.get('host') || 'localhost:3000';
+    const isLocal = hostStr.includes('localhost');
+    const origin = isLocal ? `http://${hostStr}` : 'https://vsfcapitalstructuring.com';
+
     // 2. Create Charge
     const chargeData = {
         name: 'VSF Capital Tax Filing',
@@ -42,9 +49,8 @@ export async function createCoinbaseCheckout() {
             user_id: user.id,
             profile_ids: profiles.map(p => p.id).join(','), // Track who we are paying for
         },
-        // Dynamically get the base url from env or verify headers if needed, but for now process.env.NEXT_PUBLIC_BASE_URL is a safe bet if configured, or origin
-        redirect_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/filing/success`,
-        cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/filing/intake/payment`,
+        redirect_url: `${origin}/filing/success`,
+        cancel_url: `${origin}/filing/intake/payment`,
     }
 
     // 3. Create the Charge via API

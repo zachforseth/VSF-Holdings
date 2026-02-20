@@ -37,16 +37,14 @@ export async function GET(request: NextRequest) {
             supabaseAnonKey!,
             {
                 cookies: {
-                    get(name: string) {
-                        return request.headers.get('Cookie')?.match(new RegExp(`(^| )${name}=([^;]+)`))?.[2];
+                    getAll() {
+                        return request.cookies.getAll();
                     },
-                    set(name: string, value: string, options: CookieOptions) {
-                        // Instead of setting immediately, store them in our Map
-                        cookieStore.set(name, { value, options });
-                    },
-                    remove(name: string, options: CookieOptions) {
-                        // Mark for deletion in our Map
-                        cookieStore.set(name, { value: '', options: { ...options, maxAge: 0 } });
+                    setAll(cookiesToSet) {
+                        cookiesToSet.forEach(({ name, value, options }) => {
+                            // Store them in our Map for the final explicit Response attachment
+                            cookieStore.set(name, { value, options });
+                        });
                     },
                 },
             }

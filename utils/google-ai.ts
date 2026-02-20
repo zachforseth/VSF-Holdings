@@ -65,10 +65,17 @@ export async function classifyDocument(fileBuffer: Buffer, mimeType: string, fil
         const endpointId = process.env.VERTEX_ENDPOINT_ID || '7274015986133499904';
         const location = 'us-central1';
 
-        const client = new PredictionServiceClient({
+        const fs = require('fs');
+        const clientOptions: any = {
             apiEndpoint: `${location}-aiplatform.googleapis.com`,
-            keyFilename: 'google-credentials.json'
-        });
+        };
+
+        // If local file exists, use it (for local dev without GOOGLE_APPLICATION_CREDENTIALS)
+        if (fs.existsSync('google-credentials.json')) {
+            clientOptions.keyFilename = 'google-credentials.json';
+        }
+
+        const client = new PredictionServiceClient(clientOptions);
 
         const endpointName = `projects/${projectId}/locations/${location}/endpoints/${endpointId}`;
         // 1. Prepare Input for Vertex AI
