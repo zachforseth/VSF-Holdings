@@ -19,17 +19,6 @@ export async function login(formData: FormData) {
         return { error: 'Configuration Error: Missing Supabase URL' }
     }
 
-    try {
-        console.log('Testing connectivity to Supabase...')
-        const healthCheck = await fetch(`${supabaseUrl}/auth/v1/health`, { method: 'GET', cache: 'no-store' })
-        const text = await healthCheck.text()
-        console.log('Supabase Health Status:', healthCheck.status)
-        console.log('Supabase Health Response (first 200 chars):', text.substring(0, 200))
-    } catch (netErr) {
-        console.error('NETWORK ERROR: Could not reach Supabase:', netErr)
-        return { error: 'Network Error: Cound not connect to authentication server.' }
-    }
-
     let shouldRedirectAdmin = false;
     try {
         const supabase = await createClient()
@@ -58,34 +47,18 @@ export async function login(formData: FormData) {
 
         if (user) {
             let role = null;
-            const roleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-            if (roleKey) {
-                // Use Service Role to bypass RLS for role check
-                const adminClient = createAdminClient(
-                    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                    roleKey,
-                    {
-                        auth: {
-                            persistSession: false,
-                            autoRefreshToken: false,
-                        }
-                    }
-                )
+            // Use the authenticated user client to read their own profile and role
+            const { data: userProfile, error: profileErr } = await supabase
+                .from('users')
+                .select('role')
+                .eq('id', user.id)
+                .single()
 
-                const { data: userProfile, error: profileErr } = await adminClient
-                    .from('users')
-                    .select('role')
-                    .eq('id', user.id)
-                    .single()
-
-                if (profileErr) {
-                    console.error('Failed to fetch user profile role:', profileErr.message);
-                } else {
-                    role = userProfile?.role;
-                }
+            if (profileErr) {
+                console.error('Failed to fetch user profile role:', profileErr.message);
             } else {
-                console.warn('Missing SUPABASE_SERVICE_ROLE_KEY. Skipping admin role check.');
+                role = userProfile?.role;
             }
 
             const userEmailRaw = (user.email || '').toLowerCase()

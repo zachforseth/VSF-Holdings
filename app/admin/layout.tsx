@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { LayoutDashboard, Users, FileText, Settings, ShieldAlert, Clock, Search, CheckCircle2 } from 'lucide-react'
 import { getAdminDashboardData } from '@/app/actions/admin-actions'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
 
 export default async function AdminLayout({
     children,
@@ -20,20 +19,8 @@ export default async function AdminLayout({
         return redirect('/login')
     }
 
-    // SECURITY: Check for 'admin' role in public.users
-    // We use the Service Role client to ensure we can read the role regardless of RLS
-    const adminClient = createAdminClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        {
-            auth: {
-                persistSession: false,
-                autoRefreshToken: false,
-            }
-        }
-    )
-
-    const { data: userProfile } = await adminClient
+    // SECURITY: Check for 'admin' role in public.users using the authenticated user's credentials
+    const { data: userProfile } = await supabase
         .from('users')
         .select('role')
         .eq('id', user.id)
