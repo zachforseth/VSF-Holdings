@@ -6,7 +6,8 @@ import { headers } from 'next/headers'
 export async function startStripeVerification(formData: FormData) {
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
     if (!stripeSecretKey) {
-        throw new Error("Missing Stripe Secret Key");
+        console.error("Missing Stripe Secret Key");
+        return { success: false, error: "Missing Stripe Secret Key configuration." };
     }
 
     // Initialize Stripe inside the action
@@ -54,9 +55,9 @@ export async function startStripeVerification(formData: FormData) {
             // UPDATED: Use dynamic return URL
             return_url: `${baseUrl}${finalReturnPath}`,
         })
-    } catch (error) {
+    } catch (error: any) {
         console.error("Stripe Verification Session Error:", error);
-        throw new Error("Could not create verification session with Stripe.");
+        return { success: false, error: error.message || "Could not create verification session with Stripe." };
     }
 
     // 3. Save the Session ID to the database (Optional but good practice)
