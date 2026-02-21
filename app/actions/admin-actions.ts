@@ -153,9 +153,9 @@ export async function getAdminDashboardData(statusFilter?: string) {
             stats
         }
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Admin Dashboard Data Fetch Error:', error)
-        return { success: false, error: 'Failed to fetch admin data' }
+        return { success: false, error: 'Failed to fetch admin data: ' + (error?.message || String(error)) }
     }
 }
 
