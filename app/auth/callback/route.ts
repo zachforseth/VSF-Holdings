@@ -87,10 +87,8 @@ export async function GET(request: NextRequest) {
 
                 console.log('--- AUTH CALLBACK: PROFILES FOUND ---', profiles?.length || 0);
 
-                // If no profiles exist, push them to create one
-                if (!profiles || profiles.length === 0) {
-                    redirectUrl = '/filing/new-profile?onboarding=true';
-                }
+                // If no profiles exist, they will land on the dashboard natively
+                // and see the "Start your tax return" button.
 
                 // ADMIN CHECK: Override redirect if they are a VSF Admin
                 const userEmailRaw = (user.email || '').toLowerCase();

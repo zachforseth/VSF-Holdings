@@ -20,7 +20,6 @@ export async function login(formData: FormData) {
     }
 
     let shouldRedirectAdmin = false;
-    let hasProfiles = true; // Default to true for safety
     try {
         const supabase = await createClient()
 
@@ -73,16 +72,6 @@ export async function login(formData: FormData) {
             if (role === 'admin' && isAdminEmail) {
                 console.log('[LOGIN DEBUG] Marking for Admin Dashboard Redirect')
                 shouldRedirectAdmin = true;
-            } else {
-                // Client Logic: Check if they have at least 1 profile
-                const { count, error: countErr } = await supabase
-                    .from('tax_profiles')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('user_id', user.id)
-
-                if (!countErr && count === 0) {
-                    hasProfiles = false;
-                }
             }
         }
 
@@ -98,11 +87,7 @@ export async function login(formData: FormData) {
 
     // Default Client Redirect
     revalidatePath('/', 'layout')
-    if (!hasProfiles) {
-        redirect('/filing/new-profile?onboarding=true')
-    } else {
-        redirect('/dashboard')
-    }
+    redirect('/dashboard')
 }
 
 export async function signup(formData: FormData) {
