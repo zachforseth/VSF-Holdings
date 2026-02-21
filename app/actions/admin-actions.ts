@@ -1,6 +1,7 @@
 'use server'
 
-import { createClient } from '@supabase/supabase-js'
+import { createClient as createSupabaseJSClient } from '@supabase/supabase-js'
+import { createClient } from '@/utils/supabase/server'
 
 function getAdminClient() {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -10,7 +11,7 @@ function getAdminClient() {
         throw new Error("Missing Supabase Admin Environment Variables");
     }
 
-    return createClient(
+    return createSupabaseJSClient(
         supabaseUrl,
         supabaseServiceRoleKey,
         {
@@ -24,9 +25,10 @@ function getAdminClient() {
 
 export async function getAdminDashboardData(statusFilter?: string) {
     try {
-        const adminClient = getAdminClient();
+        const supabase = await createClient();
+
         // 1. Fetch all users from public.users table (excluding admins)
-        const { data: users, error: usersError } = await adminClient
+        const { data: users, error: usersError } = await supabase
             .from('users')
             .select('*')
             .neq('role', 'admin')
@@ -35,7 +37,7 @@ export async function getAdminDashboardData(statusFilter?: string) {
         if (usersError) throw usersError
 
         // 2. Fetch all profiles
-        const { data: profiles, error: profilesError } = await adminClient
+        const { data: profiles, error: profilesError } = await supabase
             .from('tax_profiles')
             .select('id, user_id, first_name, last_name, filing_status, has_unread_user_message, missing_info, filing_year')
 
