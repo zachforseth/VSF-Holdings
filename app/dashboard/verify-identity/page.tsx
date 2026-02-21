@@ -1,7 +1,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
-import { startStripeVerification } from '@/app/actions/stripe-actions'
+import VerificationButton from './verification-button'
 
 import Image from 'next/image'
 
@@ -45,17 +45,7 @@ export default async function VerifyIdentityPage({ searchParams }: { searchParam
                 {/* The Action */}
                 <div className='flex flex-col items-center space-y-6'>
 
-                    <form action={startStripeVerification} className='w-full flex justify-center'>
-                        <input type='hidden' name='profileId' value={profileId} />
-                        {returnTo && <input type='hidden' name='returnTo' value={returnTo} />}
-
-                        <button
-                            type='submit'
-                            className='bg-blue-600 text-white text-lg font-medium py-4 px-12 rounded-full hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center gap-3'
-                        >
-                            Start Verification
-                        </button>
-                    </form>
+                    <VerificationButton profileId={profileId} returnTo={returnTo} />
                     <p className='text-sm text-gray-400'>
                         Have your Driver&rsquo;s License or Passport ready.
                     </p>
