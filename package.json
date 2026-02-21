@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "NODE_OPTIONS=\"--max-old-space-size=2048\" rm -rf .next/cache && next build && find .next -name \"*.map\" -type f -delete",
+    "dev": "concurrently \"npx @tailwindcss/cli -i app/globals.css -o app/tailwind.css --watch\" \"next dev\"",
+    "build": "npx @tailwindcss/cli -i app/globals.css -o app/tailwind.css && NODE_OPTIONS=\"--max-old-space-size=2048\" rm -rf .next/cache && next build && find .next -name \"*.map\" -type f -delete",
     "start": "next start",
     "lint": "eslint"
   },
@@ -40,11 +40,13 @@
     "use-places-autocomplete": "^4.0.1"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.2.0",
     "@tailwindcss/postcss": "^4",
     "@types/google.maps": "^3.58.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.2.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
