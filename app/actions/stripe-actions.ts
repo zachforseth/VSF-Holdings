@@ -16,12 +16,13 @@ export async function startStripeVerification(formData: FormData) {
     const profileId = formData.get('profileId') as string
     let returnTo = formData.get('returnTo') as string
 
-    // 1. Get the host URL dynamically (so it works on localhost and production)
-    const headersList = await headers()
-    const origin = headersList.get('origin')
-    const host = headersList.get('x-forwarded-host') || headersList.get('host') || 'localhost:3000'
-    const protocol = headersList.get('x-forwarded-proto') || (process.env.NODE_ENV === 'development' ? 'http' : 'https')
-    const baseUrl = origin || `${protocol}://${host}`
+    // 1. Get the host URL from the client (failsafe for Amplify environment)
+    let baseUrl = formData.get('baseUrl') as string;
+
+    // In the extremely rare case it's missing, fallback to hardcoded production (but development should always pass it)
+    if (!baseUrl) {
+        baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://www.vsfholdings.com'
+    }
 
     // Ensure returnTo starts with a slash if it's a relative path just in case
     if (returnTo && !returnTo.startsWith('/') && !returnTo.startsWith('http')) {
