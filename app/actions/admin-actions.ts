@@ -25,10 +25,10 @@ function getAdminClient() {
 
 export async function getAdminDashboardData(statusFilter?: string) {
     try {
-        const supabase = await createClient();
+        const adminClient = getAdminClient();
 
         // 1. Fetch all users from public.users table (excluding admins)
-        const { data: users, error: usersError } = await supabase
+        const { data: users, error: usersError } = await adminClient
             .from('users')
             .select('*')
             .neq('role', 'admin')
@@ -37,7 +37,7 @@ export async function getAdminDashboardData(statusFilter?: string) {
         if (usersError) throw usersError
 
         // 2. Fetch all profiles
-        const { data: profiles, error: profilesError } = await supabase
+        const { data: profiles, error: profilesError } = await adminClient
             .from('tax_profiles')
             .select('id, user_id, first_name, last_name, filing_status, has_unread_user_message, missing_info, filing_year')
 
