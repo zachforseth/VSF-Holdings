@@ -10,11 +10,15 @@ export default function VerificationButton({ profileId, returnTo }: { profileId:
     const handleVerify = async (formData: FormData) => {
         setIsLoading(true);
         try {
-            await startStripeVerification(formData);
+            const result = await startStripeVerification(formData);
+            if (result?.success && result.url) {
+                window.location.href = result.url;
+            } else {
+                throw new Error(result?.error || 'Failed to start verification.');
+            }
         } catch (error: any) {
             console.error('Stripe Verification Error:', error);
             toast.error(error.message || 'Failed to start verification.');
-        } finally {
             setIsLoading(false);
         }
     };

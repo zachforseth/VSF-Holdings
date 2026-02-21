@@ -61,10 +61,10 @@ export async function startStripeVerification(formData: FormData) {
     // 3. Save the Session ID to the database (Optional but good practice)
     // For now we rely on the webhook or the return_url query params + manual verification check if needed.
 
-    // 4. Redirect the user to the Stripe Hosted Page
+    // 4. Return the verification URL to the client
     if (verificationSession?.url) {
-        redirect(verificationSession.url)
+        return { success: true, url: verificationSession.url }
     } else {
-        throw new Error('Could not create verification session URL')
+        return { success: false, error: 'Could not create verification session URL' }
     }
 }
