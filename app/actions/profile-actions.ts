@@ -98,11 +98,9 @@ export async function createTaxProfile(formData: FormData) {
     const customReturnTo = formData.get('returnTo') as string;
 
     // Determine Base Return Path
-    let returnPath = `/filing/intake/questionnaire?profileId=${data.id}&verified=true`;
+    let returnPath = `/filing/intake/questionnaire?profileId=${data.id}`;
 
-    if (isOnboarding) {
-        returnPath = '/dashboard';
-    } else if (customReturnTo) {
+    if (customReturnTo) {
         returnPath = customReturnTo;
     }
 

@@ -19,11 +19,13 @@ export default async function NewProfilePage({ searchParams }: { searchParams: P
             <div className='w-full max-w-4xl'>
 
                 {/* Back Button - loops back to the "Hub" */}
-                <div className='mb-6 md:mb-0 md:absolute md:top-8 md:left-8'>
-                    <Link href={`/filing/select-profile?year=${selectedYear}`} className='inline-flex items-center text-sm font-medium text-gray-400 hover:text-gray-900 transition-colors'>
-                        <ArrowLeft className='w-4 h-4 mr-1' /> Back
-                    </Link>
-                </div>
+                {onboarding !== 'true' && (
+                    <div className='mb-6 md:mb-0 md:absolute md:top-8 md:left-8'>
+                        <Link href={`/filing/select-profile?year=${selectedYear}`} className='inline-flex items-center text-sm font-medium text-gray-400 hover:text-gray-900 transition-colors'>
+                            <ArrowLeft className='w-4 h-4 mr-1' /> Back
+                        </Link>
+                    </div>
+                )}
 
                 <div className='text-center mb-10'>
                     <h1 className='text-3xl font-bold text-gray-900 tracking-tight'>
