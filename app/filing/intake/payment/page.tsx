@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createStripeCheckout } from '@/app/actions/payment-actions'
-import { createCoinbaseCheckout } from '@/app/actions/coinbase-actions'
+import CryptoCheckoutButton from './crypto-checkout-button'
 
 export default async function PaymentMethodPage() {
     const supabase = await createClient()
@@ -95,14 +95,7 @@ export default async function PaymentMethodPage() {
                             className="w-52 h-auto mb-5 -mt-1 object-contain"
                         />
 
-                        <form action={createCoinbaseCheckout} className="w-full mt-auto">
-                            <button
-                                type="submit"
-                                className="w-full bg-[#4F62D6] text-[13px] font-semibold text-white py-3 rounded-xl hover:opacity-90 transition-opacity shadow-sm"
-                            >
-                                Continue with secure checkout
-                            </button>
-                        </form>
+                        <CryptoCheckoutButton />
                     </div>
 
                     {/* Powered By Footer (Outside) */}
