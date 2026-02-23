@@ -209,26 +209,40 @@ export default function DocumentsClient({
                 {/* CONDITIONAL REMINDERS */}
                 <div className="mt-6 flex flex-wrap gap-3">
                     {/* Always Needed */}
-                    <div className="px-4 py-2 bg-blue-50 text-blue-700 text-sm font-semibold rounded-full border border-blue-100 uppercase tracking-tight">
+                    <div className="px-4 py-2 bg-blue-50 text-blue-700 text-sm font-semibold rounded-full border border-blue-100 uppercase tracking-tight shadow-sm">
                         T4 Slips / ID
                     </div>
+                    <div className="px-4 py-2 bg-blue-50 text-blue-700 text-sm font-semibold rounded-full border border-blue-100 uppercase tracking-tight shadow-sm">
+                        Notice of Assessment from the prior year
+                    </div>
 
-                    {/* Conditional Tags */}
-                    {(intakeData?.capital_gains === 'yes' || intakeData?.capital_gains === true) && (
-                        <div className="px-4 py-2 bg-blue-50 text-blue-700 text-sm font-semibold rounded-full border border-blue-100 uppercase tracking-tight">
-                            Crypto/Stock Reports
-                        </div>
+                    {/* Conditional Tags based on Boolean checks */}
+                    {intakeData?.has_t4 === 'true' && <Tag label="T4 Slip(s)" />}
+                    {intakeData?.has_t4a === 'true' && <Tag label="T4A Slip(s) (Pension/Annuity)" />}
+                    {intakeData?.has_t5007 === 'true' && <Tag label="T5007 Slip(s) (Workers Comp)" />}
+                    {intakeData?.has_t4e === 'true' && <Tag label="T4E Slip(s) (EI)" />}
+                    {intakeData?.has_tuition === 'on' && <Tag label="T2202 Slip (Tuition)" />}
+                    {intakeData?.has_t3 === 'true' && <Tag label="T3 Slip(s) (Trusts)" />}
+                    {intakeData?.has_t5 === 'true' && <Tag label="T5 Slip(s) (Investments)" />}
+
+                    {(intakeData?.capital_gains === 'true' || intakeData?.capital_gains === 'yes' || intakeData?.capital_gains === true) && (
+                        <Tag label="Capital Gains Reports (Crypto/Stock)" />
                     )}
-                    {(intakeData?.rental_income === 'yes' || intakeData?.rental_income === true) && (
-                        <div className="px-4 py-2 bg-blue-50 text-blue-700 text-sm font-semibold rounded-full border border-blue-100 uppercase tracking-tight">
-                            Rental Expenses (Mortgage/Taxes)
-                        </div>
+                    {(intakeData?.foreign_property === 'true' || intakeData?.foreign_property === true) && (
+                        <Tag label="Foreign Asset Declarations (T1135 Info)" />
                     )}
-                    {(intakeData?.self_employed === 'yes' || intakeData?.self_employed === true) && (
-                        <div className="px-4 py-2 bg-blue-50 text-blue-700 text-sm font-semibold rounded-full border border-blue-100 uppercase tracking-tight">
-                            Business Income/Expenses
-                        </div>
+                    {(intakeData?.self_employed === 'on' || intakeData?.self_employed === 'yes' || intakeData?.self_employed === true) && (
+                        <Tag label="Business Income & Expense Summary" />
                     )}
+                    {(intakeData?.rental_income === 'on' || intakeData?.rental_income === 'yes' || intakeData?.rental_income === true) && (
+                        <Tag label="Rental Income & Expense Summary" />
+                    )}
+
+                    {intakeData?.disability_credit === 'true' && <Tag label="T2201 Disability Certificate" />}
+                    {intakeData?.moving_expenses === 'true' && <Tag label="Moving Expense Receipts" />}
+                    {intakeData?.medical_expenses === 'true' && <Tag label="Medical Expense Receipts" />}
+                    {intakeData?.charitable_donations === 'true' && <Tag label="Charitable Donation Receipts" />}
+                    {intakeData?.support_payments === 'true' && <Tag label="Support Payment Records" />}
                 </div>
             </div>
 
@@ -370,6 +384,14 @@ export default function DocumentsClient({
                 </button>
             </div>
 
+        </div>
+    )
+}
+
+function Tag({ label }: { label: string }) {
+    return (
+        <div className="px-4 py-2 bg-blue-50 text-blue-700 text-sm font-semibold rounded-full border border-blue-100 shadow-sm animate-in fade-in zoom-in-95 duration-200">
+            {label}
         </div>
     )
 }
