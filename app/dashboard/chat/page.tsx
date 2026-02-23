@@ -283,10 +283,6 @@ function ChatContent() {
                         {messages.length === 0 && (
                             <div className="text-center text-gray-400 py-10 space-y-2">
                                 <p>No messages yet. Start the conversation below!</p>
-                                <div className="mt-6 inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50/50 rounded-full">
-                                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-                                    <p className="text-xs text-blue-700 font-bold uppercase tracking-widest">Protected by Human-Verified AI Audit</p>
-                                </div>
                             </div>
                         )}
                         {messages.map((msg, index) => {
@@ -328,7 +324,7 @@ function ChatContent() {
                                             handleSendMessage(e);
                                         }
                                     }}
-                                    placeholder="Message your advisory team (Human-Verified AI Audit active)"
+                                    placeholder="Message your advisory team..."
                                     className="flex-1 bg-transparent border-none outline-none focus:ring-0 text-sm text-gray-900 placeholder:text-gray-400 font-medium"
                                 />
                             </div>

@@ -22,7 +22,7 @@ export async function startStripeVerification(formData: FormData) {
 
     // In the extremely rare case it's missing, fallback to hardcoded production (but development should always pass it)
     if (!baseUrl) {
-        baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://www.vsfholdings.com'
+        baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://www.vsfcapitalstructuring.com'
     }
 
     // Ensure returnTo starts with a slash if it's a relative path just in case

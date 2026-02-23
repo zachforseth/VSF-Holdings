@@ -10,6 +10,9 @@ export default function VerificationButton({ profileId, returnTo }: { profileId:
     const handleVerify = async (formData: FormData) => {
         setIsLoading(true);
         try {
+            // Explicitly attach the client-side base URL to avoid server-side header crashes
+            formData.append('baseUrl', window.location.origin);
+
             const result = await startStripeVerification(formData);
             if (result?.success && result.url) {
                 window.location.href = result.url;

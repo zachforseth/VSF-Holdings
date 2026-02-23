@@ -10,7 +10,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://vsfholdings.com'),
+  metadataBase: new URL('https://vsfcapitalstructuring.com'),
   title: "VSF Capital Structuring",
   description: "High-end investment and capital structuring. Powered by the VSF Clarity Engine™.",
 };
@@ -19,9 +19,9 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   "name": "VSF Capital Structuring",
-  "image": "https://vsfholdings.com/og-image.jpg",
-  "@id": "https://vsfholdings.com",
-  "url": "https://vsfholdings.com",
+  "image": "https://vsfcapitalstructuring.com/og-image.jpg",
+  "@id": "https://vsfcapitalstructuring.com",
+  "url": "https://vsfcapitalstructuring.com",
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "West Tower, Bankers Hall",
