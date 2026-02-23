@@ -35,7 +35,7 @@ export async function createStripeCheckout() {
             currency: 'cad',
             product_data: {
                 name: `Tax Filing: ${profile.first_name} ${profile.last_name}`,
-                description: `${profile.quoted_plan} (2025 Tax Return)`,
+                description: `${profile.quoted_plan} (${profile.filing_year || 2024} Tax Return)`,
             },
             unit_amount: (profile.quoted_price || 0) * 100, // Stripe expects cents
         },

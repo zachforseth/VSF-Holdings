@@ -40,12 +40,18 @@ export async function createCoinbaseCheckout() {
         const origin = isLocal ? `http://${hostStr}` : 'https://vsfcapitalstructuring.com';
 
         // 2. Create Charge
+
+        // Format the invoice description based on how many profiles are in the cart
+        const invoiceDescription = profiles.length === 1
+            ? `${profiles[0].quoted_plan} (${profiles[0].filing_year || 2024} Tax Return)`
+            : `Bulk Tax Filing for ${profiles.length} profile(s)`;
+
         const chargeData = {
             name: 'VSF Capital Tax Filing',
-            description: `Tax Filing for ${profiles.length} profile(s)`,
+            description: invoiceDescription,
             pricing_type: 'fixed_price',
             local_price: {
-                amount: totalAmount.toString(),
+                amount: totalAmount.toFixed(2), // Ensure string format
                 currency: 'CAD',
             },
             metadata: {
