@@ -8,8 +8,13 @@ import { Client, resources } from 'coinbase-commerce-node' // You likely install
 export async function createCoinbaseCheckout() {
     try {
         console.log("Starting Coinbase Checkout...");
+
+        // Debugging AWS Amplify Environment variables
+        console.log("[DEBUG] All Process Env Keys:", Object.keys(process.env).filter(k => k.includes('COINBASE') || k.includes('NEXT_PUBLIC')));
+
         const coinbaseApiKey = process.env.COINBASE_API_KEY;
         if (!coinbaseApiKey) {
+            console.error("[DEBUG] COINBASE_API_KEY undefined inside Server Action environment. Available keys:", Object.keys(process.env).length);
             throw new Error('Server Configuration Error: Missing Coinbase API Key');
         }
 
