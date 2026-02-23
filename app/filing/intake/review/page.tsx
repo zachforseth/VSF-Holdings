@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function ReviewPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | undefined }> }) {
     const params = await searchParams;
-    const profileId = params.profileId;
+    const profileId = params.profileId?.substring(0, 36);
 
     if (!profileId) redirect('/filing/select-profile');
 
@@ -20,7 +20,10 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
         .eq('id', profileId)
         .single()
 
-    if (!profile) redirect('/filing/select-profile');
+    if (!profile) {
+        console.error(`[ReviewPage] Profile lookup failed for ID: ${profileId}`);
+        redirect('/filing/select-profile');
+    }
 
     // STATELESS DATA SOURCE
     // We prefer data from URL params (the "Scan Result").
