@@ -42,7 +42,22 @@ export async function createStripeCheckout() {
         quantity: 1,
     }))
 
-    // 3. Create Session
+    // 3. Resolve Stripe Customer
+    // We look up by email so we can enforce "one per customer" coupon limits correctly.
+    let customerId = '';
+    const existingCustomers = await stripe.customers.list({ email: user.email, limit: 1 });
+
+    if (existingCustomers.data.length > 0) {
+        customerId = existingCustomers.data[0].id;
+    } else {
+        const newCustomer = await stripe.customers.create({
+            email: user.email,
+            metadata: { user_id: user.id }
+        });
+        customerId = newCustomer.id;
+    }
+
+    // 4. Create Session
     const headersList = await headers();
     const hostStr = headersList.get('x-forwarded-host') || headersList.get('host') || 'localhost:3000';
     const isLocal = hostStr.includes('localhost');
@@ -52,13 +67,15 @@ export async function createStripeCheckout() {
         payment_method_types: ['card'],
         line_items: line_items,
         mode: 'payment',
+        customer: customerId, // Use the resolved persistent customer
+        allow_promotion_codes: true, // Enables the promo code input
         success_url: `${origin}/filing/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${origin}/filing/intake/payment`,
         metadata: {
             user_id: user.id, // We bill the Master Account
             profile_ids: profiles.map(p => p.id).join(','), // Track exactly which profiles this covers
-        },
-        customer_email: user.email // Prefill the email for better UX
+        }
+        // Removed customer_email because Stripe forbids sending both 'customer' and 'customer_email' simultaneously
     })
 
     if (session.url) {
