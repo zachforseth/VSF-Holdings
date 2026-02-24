@@ -13,6 +13,7 @@ export default function DashboardNavbar() {
     const [isReviewReady, setIsReviewReady] = useState(false);
     const [reviewTarget, setReviewTarget] = useState('/dashboard/review');
     const [unreadCount, setUnreadCount] = useState(0);
+    const [userName, setUserName] = useState<string>('');
     const dropdownRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
     const pathname = usePathname();
@@ -28,6 +29,10 @@ export default function DashboardNavbar() {
         const initializeNavbar = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
+
+            const nameToDisplay = user.user_metadata?.full_name || user.user_metadata?.name;
+            const emailPrefix = user.email ? user.email.split('@')[0] : '';
+            setUserName(nameToDisplay || emailPrefix || 'Profile');
 
             const fetchNavbarData = async () => {
                 // Fetch profiles for unread messages AND review status
@@ -226,7 +231,7 @@ export default function DashboardNavbar() {
                                 <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                                     <User className="w-5 h-5 text-gray-900" />
                                 </div>
-                                <span className="font-bold text-gray-900">Zach Forseth</span>
+                                <span className="font-bold text-gray-900 truncate max-w-[150px]">{userName || 'Profile'}</span>
                             </div>
                             {/* Context Switch */}
                             <div className="py-2 border-b border-gray-100">
@@ -302,7 +307,7 @@ export default function DashboardNavbar() {
                                     <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                                         <User className="w-5 h-5 text-gray-900" />
                                     </div>
-                                    <span className="font-bold text-gray-900">Profile</span>
+                                    <span className="font-bold text-gray-900 truncate max-w-[150px]">{userName || 'Profile'}</span>
                                 </div>
                                 <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isMobileProfileOpen ? 'rotate-180' : ''}`} />
                             </button>
