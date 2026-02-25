@@ -51,6 +51,21 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        {/* Global Google Analytics Loader */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-T2DHQSSMGN"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-T2DHQSSMGN');
+          `}
+        </Script>
+
         {/* Global Google Maps Loader - Ensures availability on Public & Portal pages */}
         <Script
           src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&loading=async`}
