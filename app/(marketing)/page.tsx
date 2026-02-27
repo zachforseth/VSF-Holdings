@@ -28,7 +28,7 @@ export default async function Home() {
               Keep more of what&apos;s yours.
             </h2>
             <h1 className="text-4xl lg:text-5xl font-bold leading-tight text-white font-manrope">
-              Taxes are complicated. Filing them shouldn&apos;t be.
+              File Your 2025 Personal Taxes Online in Minutes. Secure. Transparent. Human Reviewed.
             </h1>
             <p className="text-lg text-white/90 max-w-lg">
               Upload your documents, answer a few questions, and have your return prepared by our team.
