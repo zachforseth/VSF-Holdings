@@ -34,7 +34,7 @@ export default async function Home() {
               Upload your documents, answer a few questions, and have your return prepared by our team.
             </p>
             <div className="pt-4">
-              <Link href="/get-started">
+              <Link href="/login">
                 <Button size="lg" className="rounded-full px-8 font-semibold bg-white text-[#2952E3] hover:bg-white/90">
                   Start Filing
                 </Button>
@@ -112,7 +112,7 @@ export default async function Home() {
               Accurately, securely, and on your schedule.
             </p>
             <div className="mt-8">
-              <Link href="/get-started">
+              <Link href="/login">
                 <Button className="rounded-full px-8 py-6 text-lg font-semibold bg-white text-[#2952E3] hover:bg-white/90 w-fit">
                   Start Filing
                 </Button>
@@ -280,7 +280,7 @@ export default async function Home() {
 
           <div className='flex justify-center'>
             <Link
-              href='/get-started'
+              href='/login'
               className='inline-flex items-center justify-center px-12 py-4 text-xl font-semibold text-white transition-all bg-blue-600 rounded-full hover:bg-blue-700 hover:-translate-y-1'
             >
               Start Filing
