@@ -67,6 +67,16 @@ export default function SignUpPage() {
       }
       setLoading(false);
     } else {
+      // TRACKING: Registration Success
+      if (typeof window !== "undefined") {
+        if ((window as any).fbq) {
+          (window as any).fbq('track', 'CompleteRegistration');
+        }
+        if ((window as any).ttq) {
+          (window as any).ttq.track('CompleteRegistration');
+        }
+      }
+
       // SUCCESS: Redirect to dashboard directly since email confirmation is disabled
       router.push('/dashboard');
     }

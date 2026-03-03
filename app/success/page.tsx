@@ -30,6 +30,26 @@ function SuccessContent() {
                 const data = await res.json();
                 setJobData(data.job);
                 setPaymentInfo(data.paymentInfo);
+
+                // TRACKING: Purchase Success
+                if (typeof window !== "undefined" && data.job) {
+                    if ((window as any).fbq) {
+                        (window as any).fbq('track', 'Purchase', {
+                            currency: 'CAD',
+                            value: 50.00,
+                            content_name: data.job.package_tier || 'Standard',
+                            content_type: 'Tax Package'
+                        });
+                    }
+                    if ((window as any).ttq) {
+                        (window as any).ttq.track('CompletePayment', {
+                            content_type: 'Tax Package',
+                            content_name: data.job.package_tier || 'Standard',
+                            currency: 'CAD',
+                            value: 50.00
+                        });
+                    }
+                }
             } catch (err) {
                 console.error("Verification Error:", err);
             } finally {

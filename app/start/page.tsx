@@ -14,6 +14,16 @@ function StartContent() {
 
     const handleNext = () => {
         if (selectedMethod) {
+            // TRACKING: Start Questionnaire
+            if (typeof window !== "undefined") {
+                if ((window as any).fbq) {
+                    (window as any).fbq('trackCustom', 'StartQuestionnaire', { method: selectedMethod });
+                }
+                if ((window as any).ttq) {
+                    (window as any).ttq.track('StartQuestionnaire', { method: selectedMethod });
+                }
+            }
+
             if (selectedMethod === "home") {
                 router.push(`/instructions?plan=${plan}`);
             } else if (selectedMethod === "office") {
