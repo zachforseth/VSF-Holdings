@@ -5,7 +5,7 @@ import { getDocuments } from '@/app/actions/document-actions'
 export default async function DocumentsPage({
     searchParams,
 }: {
-    searchParams: { profileId: string }
+    searchParams: Promise<{ profileId: string }>
 }) {
     // 1. Fetch Profile ID
     const { profileId } = await searchParams
@@ -23,6 +23,12 @@ export default async function DocumentsPage({
         .single()
 
     const intakeData = profile?.intake_responses || null
+
+    // Require intake responses before allowing document uploads
+    if (!intakeData || Object.keys(intakeData).length === 0) {
+        import('next/navigation').then(m => m.redirect(`/filing/intake/questionnaire?profileId=${profileId}`))
+        return null // Wait for redirect
+    }
 
     // 3. Fetch Existing Documents (Server Side)
     // This runs on the server every request (dynamic)

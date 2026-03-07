@@ -151,6 +151,27 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                     {/* --- LEFT COLUMN (Main Content) --- */}
                     <div className='lg:col-span-8 space-y-12'>
 
+                        {/* REVIEW QUOTE BANNER */}
+                        {profiles?.some(p => p.filing_status === 'draft' && p.quoted_plan) && (
+                            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in slide-in-from-top-4 mb-4">
+                                <div>
+                                    <h3 className="text-blue-800 font-bold text-lg flex items-center gap-2">
+                                        <FileSearch className="w-5 h-5" />
+                                        Quote Ready for Review
+                                    </h3>
+                                    <p className="text-blue-700 text-sm mt-1">
+                                        Your documents have been analyzed. Please review your personalized quote to proceed.
+                                    </p>
+                                </div>
+                                <Link
+                                    href={`/filing/intake/processing?profileId=${profiles.find(p => p.filing_status === 'draft' && p.quoted_plan)?.id}`}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl transition-all text-sm whitespace-nowrap shadow-sm"
+                                >
+                                    Review Quote
+                                </Link>
+                            </div>
+                        )}
+
                         {/* PAYMENT REQUIRED BANNER */}
                         {profiles?.some(p => p.filing_status === 'ready_to_pay') && (
                             <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in slide-in-from-top-4">
@@ -340,7 +361,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                                         s === 'APPROVED' ? "Your return has been approved for filing." :
                                             isInReview ? "Your return is ready for review." :
                                                 isInProgress ? "We are working on your return." :
-                                                    s === 'READY_TO_PAY' ? "Your quote is ready for review." :
+                                                    (s === 'READY_TO_PAY' || (s === 'DRAFT' && primaryProfile.quoted_plan)) ? "Your quote is ready for review." :
                                                         s === 'PAID' ? "Your documents have been received." :
                                                             (primaryProfile.intake_responses && Object.keys(primaryProfile.intake_responses).length > 0) ? "Please finish uploading your documents." :
                                                                 "Please complete your tax questionnaire to begin."}
@@ -380,8 +401,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                                     // 2. Questionnaire Missing
                                     const hasStartedReturn = profile.intake_responses && Object.keys(profile.intake_responses).length > 0
 
-                                    // 3. Documents/Quote Missing
-                                    const needsDocuments = profile.filing_status === 'draft' || !profile.quoted_plan
+                                    // 3. Documents Missing
+                                    const needsDocuments = profile.filing_status === 'draft' && !profile.quoted_plan
+
+                                    // 3b. Quote Review Required
+                                    const needsQuoteReview = profile.filing_status === 'draft' && !!profile.quoted_plan
 
                                     // 4. Payment Missing
                                     const needsPayment = profile.filing_status === 'ready_to_pay'
@@ -402,6 +426,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                                         } else if (needsDocuments) {
                                             nextStepText = 'Upload Documents'
                                             nextStepUrl = `/filing/intake/documents?profileId=${profile.id}`
+                                        } else if (needsQuoteReview) {
+                                            nextStepText = 'Review Quote'
+                                            nextStepUrl = `/filing/intake/processing?profileId=${profile.id}`
                                         } else if (needsPayment) {
                                             nextStepText = 'View Quote & Pay'
                                             nextStepUrl = `/filing/intake/review-group`
