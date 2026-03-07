@@ -1,15 +1,24 @@
 'use server'
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+import { encryptSIN, hashSIN, extractSINLast4, validateSIN } from '@/utils/encryption'
 
 // 1. FETCH PROFILES (For the 'Select Profile' page)
 export async function getTaxProfiles() {
     const supabase = await createClient()
 
     // The Database automatically filters this to only show YOUR profiles
+    // IMPORTANT: Exclude plaintext/encrypted SIN from the payload.
+    // Fetch sin_last4 for UI masking, and sin_hash for grouping.
     const { data: profiles, error } = await supabase
         .from('tax_profiles')
-        .select('*')
+        .select(`id, user_id, first_name, last_name, email, date_of_birth, marital_status,
+                is_citizen, phone_number, address, city, province, postal_code, residency_province, 
+                stripe_verification_status, filing_year, has_unread_admin_message, has_unread_user_message,
+                missing_info, review_link, work_started_at, review_ready_at, filed_at, filing_status,
+                final_fee, quoted_price, payment_id, balance_owing, quoted_plan, requires_manual_review,
+                created_at, updated_at, sin_last4, sin_hash
+        `)
         .order('created_at', { ascending: false })
 
     if (error) {
@@ -31,7 +40,7 @@ export async function createTaxProfile(formData: FormData) {
     }
 
     // Prepare the data for the database
-    const sin = (formData.get('sin') as string || '').replace(/\s/g, '');
+    const sinRaw = (formData.get('sin') as string || '').replace(/\s/g, '');
     const firstName = formData.get('firstName') as string;
     const lastName = formData.get('lastName') as string;
     const phone = formData.get('phone') as string;
@@ -43,7 +52,16 @@ export async function createTaxProfile(formData: FormData) {
 
     if (!firstName || firstName.length < 2) throw new Error('Invalid first name');
     if (!lastName || lastName.length < 2) throw new Error('Invalid last name');
-    if (sin.length !== 9 || !/^\d+$/.test(sin)) throw new Error('SIN must be exactly 9 digits');
+
+    // Fintech-grade SIN validation (length, numerical, Luhn Check)
+    if (!validateSIN(sinRaw)) {
+        throw new Error('Invalid Social Insurance Number format or checksum');
+    }
+
+    const sinEncrypted = encryptSIN(sinRaw);
+    const sinLast4 = extractSINLast4(sinRaw);
+    const sinHash = hashSIN(sinRaw);
+
     if (!phone || !/^\d{3}-\d{3}-\d{4}$/.test(phone)) throw new Error('Invalid phone format (000-000-0000)');
     if (!/^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(postalCode)) throw new Error('Invalid postal code format');
     if (!maritalStatus) throw new Error('Please select a marital status');
@@ -65,7 +83,9 @@ export async function createTaxProfile(formData: FormData) {
         first_name: firstName,
         last_name: lastName,
         email: formData.get('email') as string,
-        sin: sin, // Store cleaned SIN
+        sin: sinEncrypted, // Backward compatibility column, populated with ciphertext
+        sin_last4: sinLast4, // For safe UI masking
+        sin_hash: sinHash,   // For deterministic DB grouping
         date_of_birth: formData.get('dob') as string,
         marital_status: formData.get('maritalStatus') as string,
 
@@ -87,6 +107,7 @@ export async function createTaxProfile(formData: FormData) {
         .insert(profileData)
         .select()
         .single()
+
 
     if (error) {
         console.error('Error creating profile:', error)
@@ -127,12 +148,12 @@ export async function startPriorYearFiling(existingProfileId: string, targetYear
     }
 
     // 2. Check if a profile for this year ALREADY exists for this SIN/Person
-    // We can check by SIN if available, or just by name/dob
+    // We can check by SIN Hash if available, or just by name/dob
     const { data: existingYearProfile } = await supabase
         .from('tax_profiles')
         .select('id, stripe_verification_status')
         .eq('user_id', user.id)
-        .eq('sin', sourceProfile.sin)
+        .eq('sin_hash', sourceProfile.sin_hash)
         .eq('filing_year', targetYear)
         .single()
 

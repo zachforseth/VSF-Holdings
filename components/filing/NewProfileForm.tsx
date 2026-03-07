@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createTaxProfile } from '@/app/actions/profile-actions'
 import usePlacesAutocomplete, { getGeocode } from "use-places-autocomplete"
+import { validateSINClient } from '@/utils/validation'
 
 interface Props {
     userEmail: string
@@ -67,7 +68,7 @@ export default function NewProfileForm({ userEmail, year, onboarding, returnTo, 
         if (val.length > 0) setSinTouched(true)
     }
 
-    const isSinInvalid = sinTouched && sin.length > 0 && sin.length < 9
+    const isSinInvalid = sinTouched && sin.length > 0 && (sin.length < 9 || !validateSINClient(sin))
 
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         // Clean non-numbers
@@ -182,7 +183,7 @@ export default function NewProfileForm({ userEmail, year, onboarding, returnTo, 
                             }`}
                     />
                     <p className={`mt-1 text-xs ${isSinInvalid ? 'text-red-500 font-medium' : 'text-gray-400'}`}>
-                        {isSinInvalid ? "Please make sure there's 9 digits" : "9 digits (numbers only)"}
+                        {isSinInvalid ? "Please enter a valid 9-digit Canadian SIN" : "9 digits (numbers only)"}
                     </p>
                 </div>
 

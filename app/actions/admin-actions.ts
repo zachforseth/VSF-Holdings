@@ -728,11 +728,17 @@ export async function adminCreateClientAccount(formData: FormData) {
     }
 }
 
+import { encryptSIN, hashSIN, extractSINLast4, validateSIN, decryptSIN } from '@/utils/encryption'
+import { headers } from 'next/headers'
+
 export async function adminCreateProfile(userId: string, formData: FormData) {
     try {
         const adminClient = getAdminClient();
         // Use a temporary default year until the admin selects one on the next page
         const taxYear = new Date().getFullYear().toString()
+
+        const sinRaw = (formData.get('sin') as string || '').replace(/\D/g, '');
+        if (sinRaw && !validateSIN(sinRaw)) throw new Error('Invalid Social Insurance Number format');
 
         const payload = {
             user_id: userId,
@@ -742,7 +748,9 @@ export async function adminCreateProfile(userId: string, formData: FormData) {
             first_name: formData.get('firstName') as string,
             last_name: formData.get('lastName') as string,
             date_of_birth: formData.get('dob') as string,
-            sin: (formData.get('sin') as string || '').replace(/\D/g, ''),
+            sin: sinRaw ? encryptSIN(sinRaw) : '',
+            sin_last4: sinRaw ? extractSINLast4(sinRaw) : '',
+            sin_hash: sinRaw ? hashSIN(sinRaw) : '',
             phone_number: formData.get('phone') as string,
             marital_status: formData.get('maritalStatus') as string,
             address: formData.get('address') as string,
@@ -771,11 +779,11 @@ export async function adminCreateProfile(userId: string, formData: FormData) {
 export async function adminUpdateProfileCredentials(profileId: string, formData: FormData) {
     try {
         const adminClient = getAdminClient();
-        const payload = {
+
+        const payload: any = {
             first_name: formData.get('first_name') as string,
             last_name: formData.get('last_name') as string,
             date_of_birth: formData.get('date_of_birth') as string,
-            sin: formData.get('sin') as string,
             phone_number: formData.get('phone_number') as string,
             marital_status: formData.get('marital_status') as string,
             address: formData.get('address') as string,
@@ -783,6 +791,15 @@ export async function adminUpdateProfileCredentials(profileId: string, formData:
             province: formData.get('province') as string,
             postal_code: formData.get('postal_code') as string,
             is_citizen: formData.get('is_citizen') === 'true'
+        }
+
+        const sinRaw = (formData.get('sin') as string || '').replace(/\D/g, '');
+        // Only update SIN if they provided one
+        if (sinRaw) {
+            if (!validateSIN(sinRaw)) throw new Error('Invalid Social Insurance Number format');
+            payload.sin = encryptSIN(sinRaw);
+            payload.sin_last4 = extractSINLast4(sinRaw);
+            payload.sin_hash = hashSIN(sinRaw);
         }
 
         const { error } = await adminClient
@@ -796,6 +813,55 @@ export async function adminUpdateProfileCredentials(profileId: string, formData:
         return { success: true }
     } catch (error: any) {
         return { success: false, error: error.message }
+    }
+}
+
+export async function adminDecryptSIN(profileId: string) {
+    try {
+        // 1. Authenticate Admin (Using standard client to ensure user is logged in)
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Unauthorized');
+
+        // Ensure user is an admin (assuming custom claims or users table role)
+        const { data: userData } = await supabase.from('users').select('role').eq('id', user.id).single();
+        if (userData?.role !== 'admin' && userData?.role !== 'super_admin') {
+            throw new Error('Forbidden: Admin access only');
+        }
+
+        const adminClient = getAdminClient();
+
+        // 2. Fetch the encrypted SIN
+        const { data: profile, error } = await adminClient
+            .from('tax_profiles')
+            .select('sin')
+            .eq('id', profileId)
+            .single();
+
+        if (error || !profile) throw new Error('Profile not found');
+        if (!profile.sin) return { success: true, sin: null };
+
+        // 3. Decrypt
+        const decryptedSin = decryptSIN(profile.sin);
+
+        // 4. Log the access with IP and User-Agent
+        const headersList = await headers();
+        const ip = headersList.get('x-forwarded-for') || 'Unknown IP';
+        const userAgent = headersList.get('user-agent') || 'Unknown Agent';
+
+        await adminClient.from('sin_access_logs').insert({
+            admin_id: user.id,
+            profile_id: profileId,
+            action: 'DECRYPT_SIN',
+            ip_address: ip,
+            user_agent: userAgent
+        });
+
+        // 5. Return decrypted value to admin viewer
+        return { success: true, sin: decryptedSin };
+    } catch (error: any) {
+        console.error('Admin Decrypt SIN Error:', error);
+        return { success: false, error: error.message };
     }
 }
 

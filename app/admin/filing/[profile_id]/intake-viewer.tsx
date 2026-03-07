@@ -1,31 +1,29 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { Check, X, Eye, EyeOff, Copy, Filter, ChevronDown, ChevronUp, FileText } from 'lucide-react'
 import { toast } from 'sonner' // Assuming sonner is used, or we can use a simple alert/console for now if not installed. Let's use simple fallback if needed.
-import { getDocumentUrl } from '@/app/actions/admin-actions'
+import { getDocumentUrl, adminDecryptSIN } from '@/app/actions/admin-actions'
 import AdminIntakeForm from './admin-intake-form'
 
 // CATEGOTY DEFINITIONS
 const CATEGORIES = {
-    identity: ['first_name', 'last_name', 'sin', 'date_of_birth', 'marital_status', 'residency_province'],
+    identity: ['first_name', 'last_name', 'sin', 'sin_last4', 'date_of_birth', 'marital_status', 'residency_province'],
     banking: ['institution_number', 'transit_number', 'account_number', 'bank_name', 'void_cheque_path'],
     income: ['has_t4', 'has_t5', 'has_t3', 'has_t4a', 'has_t4e', 'has_t5007', 'self_employed', 'rental_income', 'capital_gains', 'foreign_income'],
     deductions: ['rrsp', 'charitable_donations', 'medical_expenses', 'moving_expenses', 'tuition_credits', 'disability_credit', 'support_payments', 'has_unused_credits', 'student_loan'],
     details: ['business_name', 'business_industry', 'rental_address', 'gross_rental_income', 'marital_change_date', 'new_marital_status', 'foreign_country', 'foreign_asset_desc']
 }
 
-// Helper to determine active items
+// ... unchanged active item helper
 const isActiveItem = (val: any) => {
     if (val === true) return true
     if (typeof val === 'string' && val.toLowerCase() !== 'no' && val.trim() !== '') return true
     if (typeof val === 'number') return true
     if (Array.isArray(val)) {
         if (val.length === 0) return false;
-        // Check if any object in the array has non-empty string values (e.g. rental properties)
         return val.some(item => {
             if (typeof item !== 'object' || item === null) return true;
-            // Ignore 'id' field which might have default generated values like '1' or random string
             return Object.entries(item).some(([k, v]) => k !== 'id' && typeof v === 'string' && v.trim() !== '')
         })
     }
@@ -33,12 +31,12 @@ const isActiveItem = (val: any) => {
 }
 
 export default function IntakeResponsesViewer({ data, profile }: { data: any, profile: any }) {
-    const [showAll, setShowAll] = useState(false) // Defaults to FALSE (Worker-First)
+    const [showAll, setShowAll] = useState(false)
     const [showSin, setShowSin] = useState(false)
+    const [decryptedSin, setDecryptedSin] = useState<string | null>(null)
+    const [isPendingSin, startTransition] = useTransition()
     const [showAccount, setShowAccount] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
-
-    // ... (rest of render logic)
 
     // Filter Logic
     const filterItems = (items: any[]) => {
@@ -46,18 +44,13 @@ export default function IntakeResponsesViewer({ data, profile }: { data: any, pr
         return items.filter(item => isActiveItem(item.value))
     }
 
-    // Merge profile data and intake data for the "Identity" section if needed, 
-    // or just use profile for identity and data for the rest.
-    // The prompt implies a unified view.
-
     const copyToClipboard = (text: string, label: string) => {
         if (!text) return
         navigator.clipboard.writeText(text)
-        // Simple visual feedback could be added here
-        // toast.success(`Copied ${label}`)
     }
 
     const formatKey = (key: string) => {
+        if (key === 'sin_last4') return 'SIN (Masked)'
         return key
             .replace(/_/g, ' ')
             .replace(/([A-Z])/g, ' $1')
@@ -72,6 +65,24 @@ export default function IntakeResponsesViewer({ data, profile }: { data: any, pr
         } else {
             alert('Failed to open document: ' + error)
         }
+    }
+
+    const handleToggleSin = () => {
+        if (showSin) {
+            setShowSin(false)
+            setDecryptedSin(null) // Clear from memory when hidden
+            return
+        }
+
+        startTransition(async () => {
+            const result = await adminDecryptSIN(profile.id)
+            if (result.success && result.sin) {
+                setDecryptedSin(result.sin)
+                setShowSin(true)
+            } else {
+                alert('Failed to decrypt SIN: ' + (result.error || 'Unknown error'))
+            }
+        })
     }
 
     const renderValue = (key: string, value: any) => {
@@ -93,27 +104,34 @@ export default function IntakeResponsesViewer({ data, profile }: { data: any, pr
             )
         }
 
-        // SIN MASKING
-        if (key === 'sin') {
+        // SIN DISPLAY & DECRYPTION
+        if (key === 'sin' || key === 'sin_last4') {
+            // Note: In new architecture, 'sin' is no longer passed in the payload safely, we only get sin_last4.
+            // But if it is passed, we ignore the raw value and fetch decrypted.
+            const displayValue = showSin && decryptedSin ? decryptedSin : `••• ••• ${profile.sin_last4 || 'N/A'}`
+
             return (
                 <div className="flex items-center gap-2">
-                    <span className="font-mono text-gray-900 font-medium tracking-wide">
-                        {showSin ? value : '••• ••• ' + (value?.slice(-3) || '•••')}
+                    <span className={`font-mono font-medium tracking-wide ${showSin ? 'text-red-700 bg-red-50 px-2 rounded font-bold' : 'text-gray-900'}`}>
+                        {isPendingSin ? 'Decrypting...' : displayValue}
                     </span>
                     <button
-                        onClick={() => setShowSin(!showSin)}
-                        className="text-gray-400 hover:text-blue-600 transition-colors"
-                        title={showSin ? "Hide SIN" : "Show SIN"}
+                        onClick={handleToggleSin}
+                        disabled={isPendingSin}
+                        className="text-gray-400 hover:text-blue-600 transition-colors disabled:opacity-50"
+                        title={showSin ? "Hide SIN" : "Securely Show SIN"}
                     >
                         {showSin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
-                    <button
-                        onClick={() => copyToClipboard(value, 'SIN')}
-                        className="text-gray-400 hover:text-blue-600 transition-colors"
-                        title="Copy SIN"
-                    >
-                        <Copy className="w-4 h-4" />
-                    </button>
+                    {showSin && decryptedSin && (
+                        <button
+                            onClick={() => copyToClipboard(decryptedSin, 'SIN')}
+                            className="text-gray-400 hover:text-blue-600 transition-colors"
+                            title="Copy SIN"
+                        >
+                            <Copy className="w-4 h-4" />
+                        </button>
+                    )}
                 </div>
             )
         }
