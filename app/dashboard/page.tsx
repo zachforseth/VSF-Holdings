@@ -373,19 +373,54 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                                 {profiles?.map((profile) => {
                                     const needsBanking = !profile.bank_name && !profile.void_cheque_path
                                     const profStatus = (profile.filing_status || '').toUpperCase()
-                                    const showNeedsAttention = (needsBanking && ['PAID', 'READY_TO_PAY', 'IN_PROGRESS'].includes(profStatus)) || profStatus === 'ACTION_REQUIRED'
+                                    // Progress Detection Logic
+                                    // 1. Identity Verification Missing
+                                    const needsVerification = profile.stripe_verification_status !== 'verified'
+
+                                    // 2. Questionnaire Missing
                                     const hasStartedReturn = profile.intake_responses && Object.keys(profile.intake_responses).length > 0
 
-                                    if (!hasStartedReturn) {
+                                    // 3. Documents/Quote Missing
+                                    const needsDocuments = profile.filing_status === 'draft' || !profile.quoted_plan
+
+                                    // 4. Payment Missing
+                                    const needsPayment = profile.filing_status === 'ready_to_pay'
+
+                                    // Default completed state (paid or later)
+                                    const isSubmitted = ['PAID', 'IN_PROGRESS', 'IN_REVIEW', 'APPROVED', 'FILED'].includes(profStatus)
+
+                                    if (!isSubmitted) {
+                                        let nextStepText = 'Complete Setup'
+                                        let nextStepUrl = `/filing/intake/questionnaire?profileId=${profile.id}`
+
+                                        if (needsVerification) {
+                                            nextStepText = 'Verify Identity'
+                                            nextStepUrl = `/dashboard/verify-identity?profileId=${profile.id}&returnTo=${encodeURIComponent(`/filing/intake/questionnaire?profileId=${profile.id}`)}`
+                                        } else if (!hasStartedReturn) {
+                                            nextStepText = 'Start Questionnaire'
+                                            nextStepUrl = `/filing/intake/questionnaire?profileId=${profile.id}`
+                                        } else if (needsDocuments) {
+                                            nextStepText = 'Upload Documents'
+                                            nextStepUrl = `/filing/intake/documents?profileId=${profile.id}`
+                                        } else if (needsPayment) {
+                                            nextStepText = 'View Quote & Pay'
+                                            nextStepUrl = `/filing/intake/review-group`
+                                        }
+
                                         return (
-                                            <Link key={profile.id} href={`/filing/intake/questionnaire?profileId=${profile.id}`} className='p-6 border-b border-gray-100 last:border-0 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer group'>
-                                                <span className='text-gray-700 font-medium group-hover:text-blue-600 transition-colors'>{profile.first_name}&rsquo;s Profile</span>
-                                                <span className='text-blue-600 bg-blue-50 border border-blue-200 px-4 py-1.5 rounded-full font-bold text-xs flex items-center gap-2 group-hover:bg-blue-600 group-hover:text-white transition-all'>
-                                                    Complete Setup
+                                            <Link key={profile.id} href={nextStepUrl} className='p-6 border-b border-gray-100 last:border-0 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer group'>
+                                                <div className='flex flex-col'>
+                                                    <span className='text-gray-900 font-bold group-hover:text-blue-600 transition-colors'>{profile.first_name}&rsquo;s {profile.filing_year || '2025'} Tax Return</span>
+                                                    <span className='text-gray-500 text-sm'>Incomplete</span>
+                                                </div>
+                                                <span className='text-blue-600 bg-blue-50 border border-blue-200 px-4 py-1.5 rounded-full font-bold text-xs flex items-center gap-2 group-hover:bg-blue-600 group-hover:text-white shadow-sm transition-all'>
+                                                    {nextStepText} <ChevronRight className="w-3 h-3 relative top-[0.5px]" />
                                                 </span>
                                             </Link>
                                         )
                                     }
+
+                                    const showNeedsAttention = (needsBanking && ['PAID', 'READY_TO_PAY', 'IN_PROGRESS'].includes(profStatus)) || profStatus === 'ACTION_REQUIRED'
 
                                     return (
                                         <div key={profile.id} className='p-6 border-b border-gray-100 last:border-0 flex items-center justify-between'>

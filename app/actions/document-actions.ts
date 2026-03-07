@@ -105,9 +105,7 @@ export async function uploadTaxDocuments(formData: FormData) {
                 // Calculate Tier
                 const { calculateTier } = await import('@/utils/google-ai');
 
-                // Extract just the types for the calculator
-                const formTypes = allForms.map(e => e.type);
-                const { tier, price, reason, alert } = calculateTier(formTypes, currentProfile.intake_responses);
+                const { tier, price, reason, alert } = calculateTier(allForms, currentProfile.intake_responses);
 
                 // Update the DB with the merged forms first
                 await adminClient
@@ -306,9 +304,7 @@ export async function recalculateProfileTier(profileId: string) {
         const forms = (profile.detected_forms as any[]) || [];
         const { calculateTier } = await import('@/utils/google-ai');
 
-        // Extract form types for the calculator
-        const formTypes = forms.map(f => f.type);
-        const { tier, price, reason, alert, needsReview } = calculateTier(formTypes, profile.intake_responses);
+        const { tier, price, reason, alert, needsReview } = calculateTier(forms, profile.intake_responses);
 
         console.log(`[RecalcTier] Profile ${profileId}: ${tier} ($${price}). Reason: ${reason}`);
 
@@ -399,8 +395,7 @@ export async function reprocessAllDocuments(profileId: string) {
         if (!profile) throw new Error('Profile not found');
 
         const { calculateTier } = await import('@/utils/google-ai');
-        const formTypes = allDetectedForms.map(f => f.type);
-        const { tier, price, reason, alert, needsReview } = calculateTier(formTypes, profile.intake_responses);
+        const { tier, price, reason, alert, needsReview } = calculateTier(allDetectedForms, profile.intake_responses);
 
         console.log(`[Reprocess] Scan Complete. Result: ${tier} ($${price}). Not saving to DB yet.`);
 
